@@ -14,6 +14,7 @@ namespace geotree{
       // Assign an ID double the element number. Just because
       size_t nID = i*2;
       Node thisnode(nID);
+      thisnode.setDebug(_verbose);
       _node_v.push_back(thisnode);
       size_t idx = _node_v.size()-1; // index in vector for this node
       _node_map[i*2] = idx;
@@ -85,7 +86,7 @@ namespace geotree{
 	auto siblings = _node_v[n].getSiblings();
 	if (_verbose) { std::cout << "\tnode has " << siblings.size() << " siblings" << std::endl;
 	}
-	// if > 1 siblings for now skip
+	// if > 1 siblings
 	// Make sure all siblings share the same vertex
 	if (siblings.size() > 1){
 	  auto const vtx = _node_v[n].getCorrVtx(siblings[0]);
@@ -101,6 +102,7 @@ namespace geotree{
 	if (_node_map.find(id) != _node_map.end())
 	  throw ::geoalgo::GeoAlgoException("About to create a NodeID that already exists. Not acceptable!");
 	Node tmpNode(id);
+	tmpNode.setDebug(_verbose);
 	_node_v.push_back(tmpNode);
 	_node_map[id] = _node_v.size()-1;
 	// add child nodes to newly created node
@@ -248,7 +250,7 @@ namespace geotree{
     if (_node_map.find(id2) == _node_map.end())
       throw ::geoalgo::GeoAlgoException("Node ID not found!");
 
-    if (_verbose) { std::cout << "Adding Correlation..." << std::endl; }
+    if (_verbose) { std::cout << "\tAdding Correlation..." << std::endl; }
     _node_v[_node_map[id2]].addCorrelation(id1,score,vtx,type);
 
     //type returned is the relation of 1 w.r.t. 2
@@ -261,7 +263,6 @@ namespace geotree{
     else if (type == geotree::RelationType_t::kParent)
       otherRel = geotree::RelationType_t::kChild;
     
-    if (_verbose) { std::cout << "Adding Correlation..." << std::endl; }
     _node_v[_node_map[id1]].addCorrelation(id2,score,vtx,otherRel);
 
     return;
@@ -279,7 +280,7 @@ namespace geotree{
     if (_node_map.find(id2) == _node_map.end())
       throw ::geoalgo::GeoAlgoException("Node ID not found!");
 
-    if (_verbose) { std::cout << "Editing Correlation..." << std::endl; }
+    if (_verbose) { std::cout << "\tEditing Correlation..." << std::endl; }
     _node_v[_node_map[id2]].editCorrelation(id1,score,vtx,type);
 
     //type returned is the relation of 1 w.r.t. 2
@@ -307,7 +308,7 @@ namespace geotree{
     if (_node_map.find(id2) == _node_map.end())
       throw ::geoalgo::GeoAlgoException("Node ID not found!");
 
-    if (_verbose) { std::cout << "Editing Correlation Score..." << std::endl; }
+    if (_verbose) { std::cout << "\tEditing Correlation Score..." << std::endl; }
     _node_v[_node_map[id2]].editCorrelation(id1,score);
     _node_v[_node_map[id1]].editCorrelation(id2,score);
 
@@ -324,7 +325,7 @@ namespace geotree{
     if (_node_map.find(id2) == _node_map.end())
       throw ::geoalgo::GeoAlgoException("Node ID not found!");
 
-    if (_verbose) { std::cout << "Editing Correlation Vtx..." << std::endl; }
+    if (_verbose) { std::cout << "\tEditing Correlation Vtx..." << std::endl; }
     _node_v[_node_map[id2]].editCorrelation(id1,vtx);
     _node_v[_node_map[id1]].editCorrelation(id2,vtx);
 
@@ -341,7 +342,7 @@ namespace geotree{
     if (_node_map.find(id2) == _node_map.end())
       throw ::geoalgo::GeoAlgoException("Node ID not found!");
 
-    if (_verbose) { std::cout << "Editing Correlation Relation..." << std::endl; }
+    if (_verbose) { std::cout << "\tEditing Correlation Relation..." << std::endl; }
     _node_v[_node_map[id2]].editCorrelation(id1,type);
 
     //type returned is the relation of 1 w.r.t. 2
@@ -369,7 +370,7 @@ namespace geotree{
     if (_node_map.find(id2) == _node_map.end())
       throw ::geoalgo::GeoAlgoException("Node ID not found!");
 
-    if (_verbose) { std::cout << "Removing Correlation..." << std::endl; }
+    if (_verbose) { std::cout << "\tRemoving Correlation..." << std::endl; }
     _node_v[_node_map[id1]].eraseCorrelation(id2);
     _node_v[_node_map[id2]].eraseCorrelation(id1);
 
@@ -402,16 +403,31 @@ namespace geotree{
     if (_verbose) { std::cout << "Find Best parent of nodes if they have multiple ones..." << std::endl; }
     FindBestParent();
 
+    // Case in which parent and sibling are siblings
+    if (_verbose) { std::cout << "Make sure parent and sibling are logically consistent if they exist" << std::endl; }
+    ParentAndSiblingAreNotLogicallyConsistent();
+
+    // if there is a conflict, remove sibling relation
+    if (_verbose) { std::cout << "If there is a conflict, remove sibling status" << std::endl; }
+    IfConflictRemoveSibling();
+
+    /*
+    // case in which sibling does not have a parent if this ID does
+    if (_verbose) { std::cout << "Make sure sibling has a parent if we do" << std::endl; }
+    SiblingDoesNotHaveSameParent();
+    */
+
     // Conflict 3)
     // Resolve conflict of multiple siblings
     if (_verbose) { std::cout << "merge or find best sibling if there are multiple siblings..." << std::endl; }
     SortSiblings();
 
+    /*
     // Conflict 4)
     // Resolve potential conflict between siblings & parent
     if (_verbose) { std::cout << "if parent and siblings resolve conflict..." << std::endl; }
     SortSiblingsAndParent();
-
+    */
     return;
   }
 
@@ -500,14 +516,16 @@ namespace geotree{
   // accordingly
   void Manager::SortSiblings(NodeID_t ID){
 
+    if (_verbose) { std::cout << "sort siblings for node: " << ID << std::endl; }
+
     if (_node_v[_node_map[ID]].hasSiblings() == false){
-      if (_verbose) { std::cout << "no siblings. No issue..." << std::endl; }
+      if (_verbose) { std::cout << "\tno siblings. No issue..." << std::endl; }
       return;
     }
 
     auto siblings = _node_v[_node_map[ID]].getSiblings();
     if (siblings.size() == 1){
-      if (_verbose) { std::cout << "Only 1 sibling. No issue..." << std::endl; }
+      if (_verbose) { std::cout << "\tOnly 1 sibling. No issue..." << std::endl; }
       return;
     }
 
@@ -523,11 +541,26 @@ namespace geotree{
       }
     }// for all remaining siblings
     // if all vertices are the same -> return
-    if (AllSame)
+    if (AllSame){
+      // Just make sure siblings are correlated amongst themselves
+      for (size_t s1 = 0; s1 < siblings.size(); s1++){
+	for (size_t s2 = s1+1; s2 < siblings.size(); s2++){
+	  // are they correlated?
+	  if (_loose){
+	    if ( _node_v[_node_map[siblings[s1]]].isCorrelated(siblings[s2]) == true){
+	      // remove that correlation and replace it with a sibling correlation
+	      EraseCorrelation(siblings[s1],siblings[s2]);
+	    }
+	    if (_verbose) { std::cout << "\tAbout to add sibling correlation..." << std::endl; }
+	    AddCorrelation(siblings[s1],siblings[s2],0.,vtx1,::geotree::RelationType_t::kSibling);
+	  }
+	}
+      }
       return;
-
+    }
+    
     // if a particle has multiple siblings we can either:
-    // - merge those siblings together into a single vtxx
+    // - merge those siblings together into a single vtx
     // - find the best sibling
     if (_loose){
       // find all vertices of siblings
@@ -537,19 +570,30 @@ namespace geotree{
 	siblingVtxList.push_back(_node_v[_node_map[ID]].getCorrVtx(sID));
       // find "average" vertex location
       if (_verbose) { 
-	std::cout << "Find Bounding Sphere from points: " << std::endl;
-	for (auto& v : siblingVtxList)
-	  std::cout << "\t" << v << std::endl;
+	std::cout << "\tFind Bounding Sphere from points: " << std::endl;
+	for (size_t v=0; v < siblingVtxList.size(); v++)
+	  std::cout << "\tSib: " << siblings[v] << "\tVtx: "<< siblingVtxList[v] << std::endl;
       }
       ::geoalgo::Point_t newVtx = _geoAlgo.boundingSphere(siblingVtxList).Center();
-      if (_verbose) { std::cout << "average vtx from " << siblings.size() << " siblings is: " << newVtx << std::endl; }
+      if (_verbose) { std::cout << "\taverage vtx from " << siblings.size() << " siblings is: " << newVtx << std::endl; }
       // edit all correlations so that vertices are updated.
       for (auto& sID : siblings)
 	EditCorrelation(ID,sID,newVtx);
       // also, we need to add all sibling correlations from node ID to its sisters
       for (size_t s1 = 0; s1 < siblings.size()-1; s1++){
-	for (size_t s2 = s1+1; s2 < siblings.size(); s2++)
-	  AddCorrelation(siblings[s1],siblings[s2],0.,newVtx,::geotree::RelationType_t::kSibling);
+	for (size_t s2 = s1+1; s2 < siblings.size(); s2++){
+	  // if this correlation already exits -> just edit the vertex info
+	  if (_node_v[_node_map[siblings[s1]]].isCorrelated(siblings[s2])){
+	    // if correlation is not sibling then throw exception!
+	    if (_node_v[_node_map[siblings[s1]]].getCorrType(siblings[s2]) != ::geotree::RelationType_t::kSibling)
+	      throw ::geoalgo::GeoAlgoException("About to edit what you think is sibling relation but is not!");
+	    EditCorrelation(siblings[s1],siblings[s2],newVtx);
+	  }// if the two siblings are already correlated
+	  else{
+	    // if not
+	    AddCorrelation(siblings[s1],siblings[s2],0.,newVtx,::geotree::RelationType_t::kSibling);
+	  }
+	}
       }
     }// if loose (accept more siblings and smear vertex)
     // if instead one should just select the best vertex
@@ -563,7 +607,7 @@ namespace geotree{
 	  bestSibling = sID;
 	}
       }// for all siblings
-      if (_verbose) { std::cout << "Best Correlation with Node " << bestSibling << " (score = " << maxScore << ")" << std::endl; }
+      if (_verbose) { std::cout << "\tBest Correlation with Node " << bestSibling << " (score = " << maxScore << ")" << std::endl; }
       // now erase correlation with all other siblings
       for (auto& sID : siblings){
 	if (sID != bestSibling)
@@ -577,9 +621,14 @@ namespace geotree{
 
   // Sort all SiblingsAndParent
   void Manager::SortSiblingsAndParent(){
-   
+
     std::map<NodeID_t,size_t>::iterator it;
 
+    // First resolve siblings with different parents
+    for (it = _node_map.begin(); it != _node_map.end(); it++)
+      ResolveSiblingsWithDifferentParent(it->first);
+
+    // now find best vtx to describe both siblings and parent
     for (it = _node_map.begin(); it != _node_map.end(); it++)
       SortSiblingsAndParent(it->first);
  
@@ -595,6 +644,8 @@ namespace geotree{
   // 1) already checked that there is only 1 parent
   // 2) already sorted siblings of this node
   void Manager::SortSiblingsAndParent(NodeID_t ID){
+
+    if (_verbose) { std::cout << "sort sibling & parent for node: " << ID << std::endl; }
 
     // Establish that there is indeed a conflict (sibling & parent)
     // if none -> return
@@ -620,11 +671,11 @@ namespace geotree{
       }// if the node has a different parent
     }// for all siblings
     if (sameParent){
-      if (_verbose) { std::cout << "Siblings all have the same parent! yay!" << std::endl; }
+      if (_verbose) { std::cout << "\tSiblings all have the same parent! yay!" << std::endl; }
       return;
     }
     else {
-      if (_verbose) { std::cout << "Siblings don't all have the same parent! fix..." << std::endl; }
+      if (_verbose) { std::cout << "\tSiblings don't all have the same parent! fix..." << std::endl; }
       // Need to find the best combination
       // Assume no sibling has another parent
       // Also, assume siblings have been sorted already (so all have the same communal siblings)
@@ -641,22 +692,26 @@ namespace geotree{
 	  vtxList.push_back(_node_v[_node_map[ID]].getCorrVtx(sID));
 	// find "average" vertex location
 	if (_verbose) { 
-	  std::cout << "Find Bounding Sphere from points: " << std::endl;
-	  for (auto& v : vtxList)
-	    std::cout << "\t" << v << std::endl;
+	  std::cout << "\tFind Bounding Sphere from points: " << std::endl;
+	  for (size_t v=0; v < vtxList.size(); v++){
+	    if (v==0)
+	      std::cout << "\tParent ID : " << parentID << "\tVtx: "<< parentVtx << std::endl;
+	    else
+	      std::cout << "\tSibling ID: " << parentID << "\tVtx: "<< vtxList[v] << std::endl;
+	  }
 	}
 	::geoalgo::Point_t newVtx = _geoAlgo.boundingSphere(vtxList).Center();
-	if (_verbose) { std::cout << "average vtx from " << siblings.size() << " siblings is: " << newVtx << std::endl; }
+	if (_verbose) { std::cout << "\taverage vtx from " << siblings.size() << " siblings is: " << newVtx << std::endl; }
 	// Edit all sibling & parent correlations to match the new vertex information
-	if (_verbose) { std::cout << "Editing Corr Vtx between this ID and Parent" << std::endl; }
+	if (_verbose) { std::cout << "\tEditing Corr Vtx between this ID " << ID << " and Parent " << parentID << std::endl; }
 	EditCorrelation(ID,parentID,newVtx);
 	for (size_t s1 = 0; s1 < siblings.size(); s1++){
-	  if (_verbose) { std::cout << "Editing Corr Vtx between this ID and sibling" << std::endl; }
+	  if (_verbose) { std::cout << "\tEditing Corr Vtx between this ID " << ID << "and sibling " << siblings[s1] << std::endl; }
 	  EditCorrelation(ID,siblings[s1],newVtx);
 	  // Also, edit the correlations amongst the various siblings -> STUPID!!!
 	  for (size_t s2 = s1+1; s2 < siblings.size(); s2++){
 	    if (s2 != ID){
-	      if (_verbose) { std::cout << "Editing Corr Vtx between siblings" << std::endl; }
+	      if (_verbose) { std::cout << "\tEditing Corr Vtx between siblings " << siblings[s1] << " and " << siblings[s2] << std::endl; }
 	      EditCorrelation(siblings[s1],siblings[s2],newVtx);
 	    }
 	  }
@@ -664,11 +719,11 @@ namespace geotree{
 	  // if it does not exist, add parent
 	  if (_node_v[_node_map[siblings[s1]]].hasParent() == true){
 	    // ASSUME SAME PARENT!!!
-	    if (_verbose) { std::cout << "Editing Corr Vtx between Sibling & Parent" << std::endl; }
-	    EditCorrelation(s1,parentID,newVtx);
+	    if (_verbose) { std::cout << "\tEditing Corr Vtx between Sibling " << siblings[s1] << " & Parent " << parentID << std::endl; }
+	    EditCorrelation(siblings[s1],parentID,newVtx);
 	  }
 	  else{
-	    if (_verbose) { std::cout << "Adding Corr Vtx between Sibling & Parent" << std::endl; }
+	    if (_verbose) { std::cout << "\tAdding Corr Vtx between Sibling " << siblings[s1] << " & Parent " << parentID << std::endl; }
 	    AddCorrelation(siblings[s1],parentID,parentScore,newVtx,::geotree::RelationType_t::kChild);
 	  }
 	}// for all siblings
@@ -679,10 +734,10 @@ namespace geotree{
 	auto parentScore  = _node_v[_node_map[ID]].getCorrScore(parentID);
 	// get score for first sibling (assuming sibling sorting already happened
 	auto siblingScore = _node_v[_node_map[ID]].getCorrScore(siblings[0]);
-	if (_verbose) { std::cout << "Not loose. Parent Score: " << parentScore << " and sibling score: " << siblingScore << std::endl; }
+	if (_verbose) { std::cout << "\tNot loose. Parent Score: " << parentScore << " and sibling score: " << siblingScore << std::endl; }
 	if (parentScore > siblingScore){
 	  // remove sibling score
-	  if (_verbose) { std::cout << "Erase sibling correlation" << std::endl; }
+	  if (_verbose) { std::cout << "\tErase sibling correlation" << std::endl; }
 	  // for all siblings
 	  for (auto& s : siblings)
 	    EraseCorrelation(ID,s);
@@ -690,7 +745,7 @@ namespace geotree{
 	// if sibling is better
 	else{
 	  // remove parent score
-	  if (_verbose) { std::cout << "Erase parent correlation" << std::endl; }
+	  if (_verbose) { std::cout << "\tErase parent correlation" << std::endl; }
 	  EraseCorrelation(ID,parentID);
 	}
       }// if not loose
@@ -698,6 +753,257 @@ namespace geotree{
     return;
   }
 
+  // Resolve conflict with a sibling having a different parent
+  // if two siblings have different parent we need to choose 
+  // the "best" configuration, otherwise we will have a logical
+  // conflict in the tree
+  // if the node has many siblings, remove sibling relationship.....
+  void Manager::ResolveSiblingsWithDifferentParent(NodeID_t ID){
+
+    if (_verbose) { std::cout << "ResolveSiblingsWithDifferentParent for node " << ID << std::endl; }
+    
+    // Establish that there is indeed a conflict (sibling & parent)
+    // if none -> return
+    if (_node_v[_node_map[ID]].hasConflict() == false){
+      if (_verbose) { std::cout << "\tNo parent = no conflict to solve! continue..." << std::endl; }
+      return;
+    }
+    
+    // get parent
+    auto const parentID = _node_v[_node_map[ID]].getParent();
+    auto parentScore    = _node_v[_node_map[ID]].getCorrScore(parentID);
+
+    // If a sibling does not have a parent that is fine. This will be solved
+    // later in SortSiblingsAndParent
+    auto const siblings = _node_v[_node_map[ID]].getSiblings();    
+
+    for (auto& s : siblings){
+      if (_node_v[_node_map[s]].hasParent() == false)
+	continue;
+      auto sibParentID = _node_v[_node_map[s]].getParent();
+      // if this parent ID is the same as the one for the node
+      // under consideration -> fine, proceed
+      if (parentID == sibParentID){
+	if (_verbose) { std::cout << "\tParents: " << parentID << " and " << sibParentID << ". Same parent = no conflict to solve! continue..." << std::endl; }
+	continue;
+      }
+      if (_verbose) { std::cout << "\tSibling and this node have differnt parents! Need to resolve the conlfict!" << std::endl; }
+      
+      // if multiple siblings -> remove sibling relation
+      if (siblings.size() > 1){
+	if (_verbose) { std::cout << "\tMany siblings: removing sibling relation because easiest now!" << std::endl; }
+	EraseCorrelation(ID,s);
+	continue;
+      }
+
+      // if we made it to here then we have a problem!
+      // the sibling has a different parent. Fix this!
+      // situation is like this:
+      // (2) is the node we are examining, with ID = ID 
+      // (1) parent  of (2)
+      // (3) parent  of (4)
+      // (2) sibling of (4)
+      // compare scores:
+      // (1,2) + (2,4) -> break parentage between (3) and (4)      -> case A)
+      // (3,4) + (2,4) -> break parentage between (1) and (2)      -> case B)
+      // (1,2) + (3,4) -> break sibling state between (2) and (4)  -> case C)
+      // sibling score
+      double sibScore       = _node_v[_node_map[ID]].getCorrScore(s);
+      double parentScore    = _node_v[_node_map[ID]].getCorrScore(parentID);
+      double sibParentScore = _node_v[_node_map[s]].getCorrScore(sibParentID);
+
+      //A)
+      double A = parentScore + sibScore;
+      double B = sibParentScore + sibScore;
+      double C = parentScore + sibParentScore;
+
+      if (_verbose){
+	std::cout << "\t\tA) : (ID,Sibling) + (ID,parent)         = " << A << std::endl;
+	std::cout << "\t\tB) : (ID,Sibling) + (sibling,sibParent) = " << B << std::endl;
+	std::cout << "\t\tC) : (ID,parent)  + (sibling,sibParent) = " << C << std::endl;
+      }
+
+      if ( (A > B) and (A > C) ){
+	// remove sibling's parentage correlation
+	if (_verbose) { std::cout << "\tChoosing A" << std::endl; }
+	EraseCorrelation(s,sibParentID);
+      }
+      else if (B > C){
+	// remove this node's parent correlation
+	if (_verbose) { std::cout << "\tChoosing B" << std::endl; }
+	EraseCorrelation(ID,parentID);
+      }
+      else{
+	// remove sibling correlation
+	if (_verbose) { std::cout << "\tChoosing C" << std::endl; }
+	EraseCorrelation(ID,s);
+      }
+    }// for all siblings
+
+    return;
+  }
+	
+  void Manager::ParentAndSiblingAreNotLogicallyConsistent(){
+
+    std::map<NodeID_t,size_t>::iterator it;
+
+    // First make sure sibling and parent's relation is not logically forbidden
+    for (it = _node_map.begin(); it != _node_map.end(); it++)
+      ParentAndSiblingAreNotLogicallyConsistent(it->first);
+
+    return;
+  }
+
+  void Manager::ParentAndSiblingAreNotLogicallyConsistent(NodeID_t ID){
+
+    if (_verbose) { std::cout << "Figuring out if node " << ID << " has parent-sibling conflict" << std::endl; }
+
+    // if node has parent and sibling
+    // make sure sibling is not sibling with parent
+    if (_node_v[_node_map[ID]].hasConflict() == false)
+      return;
+
+    // get siblings
+    auto const siblings = _node_v[_node_map[ID]].getSiblings();
+    // get parent
+    auto const parentID = _node_v[_node_map[ID]].getParent();
+    
+    for (auto& s : siblings){
+      // check if sibling is related to parent.
+      // if their relation is not that of parent-child
+      // need to fix things
+      if (_node_v[_node_map[s]].isCorrelated(parentID) == false)
+	continue;
+      // ok they are correlated. what is the correlation type
+      auto rel = _node_v[_node_map[s]].getCorrType(parentID);
+      // if this relation is not parentID is parent of s we have a problem
+      if ( rel == ::geotree::RelationType_t::kParent )
+	continue;
+
+      if (_verbose) { std::cout << "\tsibling " << s << " and parent "
+			      << parentID <<  " relation is not logically consistent" << std::endl; }
+      // we made it this far -> we have a problem!
+      // 3 nodes: ID, s, parentID
+      // scores to compare:
+      // A) (ID,parentID) + (ID,s)       -> this node is child of parent and sibling of s
+      // B) (ID,parentID) + (parentID,s) -> this node is child of parent and sibling is related to parent, not to this node
+      // whichever is larger wins
+      // basically compare (ID,s) and (parentID,s)
+      double A = _node_v[_node_map[ID]].getCorrScore(s);
+      double B = _node_v[_node_map[parentID]].getCorrScore(s);
+      if (A > B){
+	if (_verbose) { std::cout << "keep sibling. Remove relation between parent and sibling" << std::endl; }
+	EraseCorrelation(parentID,s);
+      }
+      else{
+	if (_verbose) { std::cout << "keep parent. Remove relation with sibling" << std::endl; }
+	EraseCorrelation(ID,s);
+      }
+    }// for all siblings
+
+    return;
+  }
+
+  void Manager::SiblingDoesNotHaveSameParent(){
+
+    std::map<NodeID_t,size_t>::iterator it;
+
+    // First make sure sibling and parent's relation is not logically forbidden
+    for (it = _node_map.begin(); it != _node_map.end(); it++)
+      SiblingDoesNotHaveSameParent(it->first);
+
+    return;
+  }
+
+
+  /// If sibling does not have the same parent -> figure out which score is largest
+  void Manager::SiblingDoesNotHaveSameParent(NodeID_t ID){
+
+    // if node has parent and sibling
+    // do something if sibling does not have a parent
+    if (_node_v[_node_map[ID]].hasConflict() == false)
+      return;
+
+    if (_verbose) { std::cout << "Making sure node " << ID 
+			      << "'s siblings also have a parent" << std::endl; }
+    
+    // get siblings
+    auto const siblings = _node_v[_node_map[ID]].getSiblings();
+    // get parent
+    auto const parentID = _node_v[_node_map[ID]].getParent();    
+
+    for (auto& s : siblings){
+
+      // does the sibling have a parent? 
+      if ( _node_v[_node_map[s]].hasParent() == true ){
+	//true...ok...either same (good) or not.
+	// if not the same this will be resolved later by
+	// ResolveSiblingsWithDifferentParent
+	continue;
+      }
+      // ok...sibling does not have a parent.
+      // compare score with sibling and that with parent
+      // eliminate correlation with lowest score
+      double parentScore  = _node_v[_node_map[ID]].getCorrScore(parentID);
+      double siblingScore = _node_v[_node_map[ID]].getCorrScore(s);
+
+      if (parentScore > siblingScore){
+	if (_verbose) { std::cout << "Sibling does not have a parent. Removing sibling with lower score" << std::endl; }
+	EraseCorrelation(ID,s);
+      }
+      else{
+	if (_verbose) { std::cout << "Sibling does not have a parent. Removing parent with lower score" << std::endl; }
+	EraseCorrelation(ID,parentID);
+      }
+
+    }// for all siblings
+
+    return;
+  }
+
+
+  void Manager::IfConflictRemoveSibling(){
+
+    std::map<NodeID_t,size_t>::iterator it;
+
+    for (it = _node_map.begin(); it != _node_map.end(); it++)
+      IfConflictRemoveSibling(it->first);
+    
+    return;
+  }
+
+  // If there is a conflict and siblings don't have the same parent -> remove sibling relation
+  void Manager::IfConflictRemoveSibling(NodeID_t ID){
+
+    // if node has parent and sibling
+    // do something if sibling does not have a parent
+    if (_node_v[_node_map[ID]].hasConflict() == false)
+      return;    
+
+    if (_verbose) { std::cout << "Node has conflict...if siblings do not agree resolve" << std::endl; } 
+
+    // get siblings
+    auto const siblings = _node_v[_node_map[ID]].getSiblings();
+    // get parent
+    auto const parentID = _node_v[_node_map[ID]].getParent();    
+
+    for (auto& s : siblings){
+      // if the sibling does not have the same parent -> remove sibling relation
+      if (_node_v[_node_map[s]].hasParent() == false){
+	if (_verbose) { std::cout << "\tsibling does not have the same parent. Remove sibling realtion " << std::endl; } 
+	EraseCorrelation(ID,s);
+	continue;
+      }
+      if (_node_v[_node_map[s]].getParent() != parentID){
+	if (_verbose) { std::cout << "\tsibling parent different from this node's parent. Remove sibling realtion " << std::endl; } 
+	EraseCorrelation(ID,s);
+	continue;
+      }
+    }// for all siblings 
+
+    return;
+  }
+  
 }
 
 #endif

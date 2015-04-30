@@ -9,8 +9,12 @@ namespace geotree{
 			    const ::geoalgo::Point_t& vtx,
 			    const geotree::RelationType_t type){
 
+    // if correlation exists then return exception!
+    if (this->isCorrelated(id) == true)
+      throw ::geoalgo::GeoAlgoException("Error: Adding correlation that already exists!");      
+    
     if (_debug){
-      std::cout << "This node: " << this->ID()
+      std::cout << "\tThis node: " << this->ID()
 		<< "\tCorrelation: " << id << "\tVtx: " << vtx << "\tScore: " << score << "\tType: " << type << std::endl;
     }
     _corrScores[id] = score;
@@ -53,7 +57,7 @@ namespace geotree{
       throw ::geoalgo::GeoAlgoException("Error: editing correlation that does not exist!");      
 
     if (_debug){
-      std::cout << "This node: " << this->ID()
+      std::cout << "\tThis node: " << this->ID()
 		<< "\tCorrelation: " << id << "\t new Score: " << score << std::endl;
     }
     _corrScores[id] = score;
@@ -72,7 +76,7 @@ namespace geotree{
       throw ::geoalgo::GeoAlgoException("Error: editing correlation that does not exist!");      
 
     if (_debug){
-      std::cout << "This node: " << this->ID()
+      std::cout << "\tThis node: " << this->ID()
 		<< "\tCorrelation: " << id << "\t new vertex: " << vtx << std::endl;
     }
     _corrVtx[id] = vtx;
@@ -91,7 +95,7 @@ namespace geotree{
       throw ::geoalgo::GeoAlgoException("Error: editing correlation that does not exist!");      
 
     if (_debug){
-      std::cout << "This node: " << this->ID()
+      std::cout << "\tThis node: " << this->ID()
 		<< "\tCorrelation: " << id << "\tType: " << type << std::endl;
     }
     _corrType[id] = type;
@@ -103,7 +107,7 @@ namespace geotree{
   void Node::eraseCorrelation(const NodeID_t node){
     
     if (_debug){
-      std::cout << "This node: " << this->ID()
+      std::cout << "\tThis node: " << this->ID()
 		<< "\tRemoving Correlation with: " << node << std::endl;
     }
 
@@ -118,7 +122,7 @@ namespace geotree{
   {
 
     if (_corrScores.find(node) == _corrScores.end()){
-      std::cout << "A score for this node does not exist!";
+      if (_debug) { std::cout << "A score for this node does not exist!"; }
       return -1;
     }
     return _corrScores[node];
@@ -133,12 +137,12 @@ namespace geotree{
     for (it = _corrType.begin(); it != _corrType.end(); it++){
       if ( (it->second == geotree::RelationType_t::kParent) or
 	   (it->second == geotree::RelationType_t::kSibling) ){
-	if (_debug) { std::cout << "Not primary" << std::endl; }
+	if (_debug) { std::cout << "\tNot primary" << std::endl; }
 	return false;
       }
     }
     
-    if (_debug) { std::cout << "Primary!" << std::endl; }
+    if (_debug) { std::cout << "\tPrimary!" << std::endl; }
     return true;
   }
 
@@ -153,7 +157,7 @@ namespace geotree{
     std::map<NodeID_t, geotree::RelationType_t>::const_iterator it;
     for (it = _corrType.begin(); it != _corrType.end(); it++){
       if (it->second == geotree::RelationType_t::kParent){
-	std::cout << "parent! ID: " << it->first << std::endl;
+	if (_debug) { std::cout << "\tparent! ID: " << it->first << std::endl; }
 	parents += 1;
       }
       if (it->second == geotree::RelationType_t::kSibling)
@@ -253,6 +257,15 @@ namespace geotree{
       throw ::geoalgo::GeoAlgoException("Trying to get siblings expecting >=1 but got 0! something went wrong!");
     
     return siblings;
+  }
+
+  // Check if node is correlated with another
+  bool Node::isCorrelated(NodeID_t id){
+    
+    if (_corrScores.find(id) != _corrScores.end())
+      return true;
+
+    return false;
   }
 
 }

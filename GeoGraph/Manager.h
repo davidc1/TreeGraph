@@ -111,7 +111,13 @@ namespace geotree{
     /// function to resolve case in which node has both sibling and parent -> right now do nothing
     void SortSiblingsAndParent();
     void SortSiblingsAndParent(NodeID_t ID);
-
+    void ResolveSiblingsWithDifferentParent(NodeID_t ID);
+    void ParentAndSiblingAreNotLogicallyConsistent();
+    void ParentAndSiblingAreNotLogicallyConsistent(NodeID_t ID);
+    void SiblingDoesNotHaveSameParent();
+    void SiblingDoesNotHaveSameParent(NodeID_t ID);
+    void IfConflictRemoveSibling();
+    void IfConflictRemoveSibling(NodeID_t ID);
   private:
 
     /// verbosity flag

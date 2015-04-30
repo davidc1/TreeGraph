@@ -49,7 +49,7 @@ namespace geotree{
     Node() {_node_id = 0; }
 
     /// Constructor
-    Node(size_t n) { _node_id = n; _debug = true; }
+    Node(size_t n) { _node_id = n; _debug = false; }
     
     /// Default destructor
     virtual ~Node(){}
@@ -130,6 +130,9 @@ namespace geotree{
 
     /// debug setter
     void setDebug(bool on) { _debug = on; }
+
+    /// Check if this node is correlated with another. Boolean return
+    bool isCorrelated(NodeID_t id);
 
   private:
 
