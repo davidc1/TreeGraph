@@ -13,6 +13,6 @@
 #pragma link C++ class geotree::Node+;
 #pragma link C++ class geotree::Manager+;
 #pragma link C++ class geotree::Relation+;
-
+#pragma link C++ class std::vector<geotree::Node>+;
 //ADD_NEW_CLASS ... do not change this line
 #endif

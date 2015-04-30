@@ -10,16 +10,23 @@ namespace geotree{
   void Manager::setObjects(size_t n){
 
     if (_verbose) { std::cout << "Setting " << n << " objects to prepare tree" << std::endl; }
+    //_node_v.resize(_node_v.size()+n);
+
     for (size_t i=0; i < n; i++){
       // Assign an ID double the element number. Just because
       size_t nID = i*2;
-      Node thisnode(nID);
-      thisnode.setDebug(_verbose);
-      _node_v.push_back(thisnode);
+      //std::cout << "creating node " << nID << std::endl;
+      //Node thisnode(nID);
+      //std::cout << "setting debug " << std::endl;
+      //thisnode.setDebug(_verbose);
+      //std::cout << "pushing back " << std::endl;
+      _node_v.emplace_back(nID);
+      //_node_v[i]=thisnode;
+      //std::cout << "done " << std::endl;
       size_t idx = _node_v.size()-1; // index in vector for this node
       _node_map[i*2] = idx;
       _index_map[idx] = nID;
-      if (_verbose) { std::cout << "Created Node Num. " << i << " with ID " << _node_v.back().ID() << std::endl; }
+      if (_verbose) { std::cout << "Created Node Num. " << i << "/" << n <<" with ID " << _node_v.back().ID() << std::endl; }
     }
     return;
   }
@@ -89,15 +96,15 @@ namespace geotree{
 	// if > 1 siblings
 	// Make sure all siblings share the same vertex
 	if (siblings.size() > 1){
-	  auto const vtx = _node_v[n].getCorrVtx(siblings[0]);
+	  auto const vtx = _node_v[n].getVtx(siblings[0]);
 	  for (auto &s : siblings){
-	    auto const vtx2 = _node_v[n].getCorrVtx(s);
+	    auto const vtx2 = _node_v[n].getVtx(s);
 	    if (vtx != vtx2)
 	      throw ::geoalgo::GeoAlgoException("Multiple siblings @ different Vertices. Should have been solved by SortSiblings!");
 	  }//for all siblings
 	}// if multiple siblings
 	// create new node to host the new siblings
-	NodeID_t id = _node_v[n].ID()*100+siblings[0]*1000; 
+	NodeID_t id = _node_v[n].ID()*100+siblings[0]*1000+1; 
 	// Make sure this ID does not exist
 	if (_node_map.find(id) != _node_map.end())
 	  throw ::geoalgo::GeoAlgoException("About to create a NodeID that already exists. Not acceptable!");
@@ -449,19 +456,20 @@ namespace geotree{
     if (_verbose) { std::cout << "look for best parent for node: " << ID << std::endl; }
 
     // iterator for correlation types
-    std::map<NodeID_t,geotree::RelationType_t>::const_iterator it;
-    // get correaltion types for this node
-    auto const cTypes = _node_v[_node_map[ID]].getCorrType();   
+    std::map<NodeID_t,geotree::Correlation>::const_iterator it;
+    // get correaltions for this node
+    auto const corrs  = _node_v[_node_map[ID]].getCorrelations();
+    //auto const cTypes = _node_v[_node_map[ID]].getCorrType();   
     // get correlation scores for this node
-    auto const cScores = _node_v[_node_map[ID]].getCorrScores();
+    //auto const cScores = _node_v[_node_map[ID]].getCorrScores();
 
     // vector where to hold parent IDs
     std::vector<size_t> parentIDs;
     // vector where to hold parent scores
     std::vector<double> parentScores;
 
-    for (it = cTypes.begin(); it != cTypes.end(); it++){
-      if (it->second == geotree::RelationType_t::kParent){
+    for (it = corrs.begin(); it != corrs.end(); it++){
+      if ((it->second).Relation() == geotree::RelationType_t::kParent){
 	//if (it->second == geotree::RelationType_t::kChild){
 	size_t pID = it->first;
 	parentIDs.push_back(pID);
@@ -532,9 +540,9 @@ namespace geotree{
     // If there are multiple siblings but with the same vertex
     // -> then we are good to go. Everything is in agreement
     bool AllSame = true;
-    auto const vtx1 = _node_v[_node_map[ID]].getCorrVtx(siblings[0]);
+    auto const vtx1 = _node_v[_node_map[ID]].getVtx(siblings[0]);
     for (size_t i=1; i < siblings.size(); i++){
-      auto const vtx2 = _node_v[_node_map[ID]].getCorrVtx(siblings[i]);
+      auto const vtx2 = _node_v[_node_map[ID]].getVtx(siblings[i]);
       if (vtx1 != vtx2){
 	AllSame = false;
 	break;
@@ -567,7 +575,7 @@ namespace geotree{
       std::vector<::geoalgo::Vector_t> siblingVtxList;
       // siblings contains NodeID of all siblings. Use to get vtx
       for (auto& sID : siblings)
-	siblingVtxList.push_back(_node_v[_node_map[ID]].getCorrVtx(sID));
+	siblingVtxList.push_back(_node_v[_node_map[ID]].getVtx(sID));
       // find "average" vertex location
       if (_verbose) { 
 	std::cout << "\tFind Bounding Sphere from points: " << std::endl;
@@ -585,7 +593,7 @@ namespace geotree{
 	  // if this correlation already exits -> just edit the vertex info
 	  if (_node_v[_node_map[siblings[s1]]].isCorrelated(siblings[s2])){
 	    // if correlation is not sibling then throw exception!
-	    if (_node_v[_node_map[siblings[s1]]].getCorrType(siblings[s2]) != ::geotree::RelationType_t::kSibling)
+	    if (_node_v[_node_map[siblings[s1]]].getRelation(siblings[s2]) != ::geotree::RelationType_t::kSibling)
 	      throw ::geoalgo::GeoAlgoException("About to edit what you think is sibling relation but is not!");
 	    EditCorrelation(siblings[s1],siblings[s2],newVtx);
 	  }// if the two siblings are already correlated
@@ -601,7 +609,7 @@ namespace geotree{
       double maxScore = 0.;
       NodeID_t bestSibling;
       for (auto& sID : siblings){
-	double score = _node_v[_node_map[ID]].getCorrScore(sID);
+	double score = _node_v[_node_map[ID]].getScore(sID);
 	if (score > maxScore){
 	  maxScore = score;
 	  bestSibling = sID;
@@ -683,13 +691,13 @@ namespace geotree{
       // otherwise : which has a larger score? parent or sibling? Choose the largest score
       if (_loose){
 	// Assign parent as parent to all others (with score of parent)
-	auto parentScore = _node_v[_node_map[ID]].getCorrScore(parentID);
+	auto parentScore = _node_v[_node_map[ID]].getScore(parentID);
 	// vertex is average of vtx for parent and vertices for siblings
-	auto parentVtx = _node_v[_node_map[ID]].getCorrVtx(parentID);
+	auto parentVtx = _node_v[_node_map[ID]].getVtx(parentID);
 	std::vector<::geoalgo::Vector_t> vtxList;
 	vtxList.push_back(parentVtx);
 	for (auto& sID : siblings)
-	  vtxList.push_back(_node_v[_node_map[ID]].getCorrVtx(sID));
+	  vtxList.push_back(_node_v[_node_map[ID]].getVtx(sID));
 	// find "average" vertex location
 	if (_verbose) { 
 	  std::cout << "\tFind Bounding Sphere from points: " << std::endl;
@@ -731,9 +739,9 @@ namespace geotree{
       // if not loose -> find best relation for this node
       else{
 	// get parent score
-	auto parentScore  = _node_v[_node_map[ID]].getCorrScore(parentID);
+	auto parentScore  = _node_v[_node_map[ID]].getScore(parentID);
 	// get score for first sibling (assuming sibling sorting already happened
-	auto siblingScore = _node_v[_node_map[ID]].getCorrScore(siblings[0]);
+	auto siblingScore = _node_v[_node_map[ID]].getScore(siblings[0]);
 	if (_verbose) { std::cout << "\tNot loose. Parent Score: " << parentScore << " and sibling score: " << siblingScore << std::endl; }
 	if (parentScore > siblingScore){
 	  // remove sibling score
@@ -771,7 +779,7 @@ namespace geotree{
     
     // get parent
     auto const parentID = _node_v[_node_map[ID]].getParent();
-    auto parentScore    = _node_v[_node_map[ID]].getCorrScore(parentID);
+    auto parentScore    = _node_v[_node_map[ID]].getScore(parentID);
 
     // If a sibling does not have a parent that is fine. This will be solved
     // later in SortSiblingsAndParent
@@ -808,9 +816,9 @@ namespace geotree{
       // (3,4) + (2,4) -> break parentage between (1) and (2)      -> case B)
       // (1,2) + (3,4) -> break sibling state between (2) and (4)  -> case C)
       // sibling score
-      double sibScore       = _node_v[_node_map[ID]].getCorrScore(s);
-      double parentScore    = _node_v[_node_map[ID]].getCorrScore(parentID);
-      double sibParentScore = _node_v[_node_map[s]].getCorrScore(sibParentID);
+      double sibScore       = _node_v[_node_map[ID]].getScore(s);
+      double parentScore    = _node_v[_node_map[ID]].getScore(parentID);
+      double sibParentScore = _node_v[_node_map[s]].getScore(sibParentID);
 
       //A)
       double A = parentScore + sibScore;
@@ -875,7 +883,7 @@ namespace geotree{
       if (_node_v[_node_map[s]].isCorrelated(parentID) == false)
 	continue;
       // ok they are correlated. what is the correlation type
-      auto rel = _node_v[_node_map[s]].getCorrType(parentID);
+      auto rel = _node_v[_node_map[s]].getRelation(parentID);
       // if this relation is not parentID is parent of s we have a problem
       if ( rel == ::geotree::RelationType_t::kParent )
 	continue;
@@ -889,8 +897,8 @@ namespace geotree{
       // B) (ID,parentID) + (parentID,s) -> this node is child of parent and sibling is related to parent, not to this node
       // whichever is larger wins
       // basically compare (ID,s) and (parentID,s)
-      double A = _node_v[_node_map[ID]].getCorrScore(s);
-      double B = _node_v[_node_map[parentID]].getCorrScore(s);
+      double A = _node_v[_node_map[ID]].getScore(s);
+      double B = _node_v[_node_map[parentID]].getScore(s);
       if (A > B){
 	if (_verbose) { std::cout << "keep sibling. Remove relation between parent and sibling" << std::endl; }
 	EraseCorrelation(parentID,s);
@@ -944,8 +952,8 @@ namespace geotree{
       // ok...sibling does not have a parent.
       // compare score with sibling and that with parent
       // eliminate correlation with lowest score
-      double parentScore  = _node_v[_node_map[ID]].getCorrScore(parentID);
-      double siblingScore = _node_v[_node_map[ID]].getCorrScore(s);
+      double parentScore  = _node_v[_node_map[ID]].getScore(parentID);
+      double siblingScore = _node_v[_node_map[ID]].getScore(s);
 
       if (parentScore > siblingScore){
 	if (_verbose) { std::cout << "Sibling does not have a parent. Removing sibling with lower score" << std::endl; }

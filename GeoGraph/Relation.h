@@ -16,7 +16,6 @@
 
 #include "Node.h"
 
-
 namespace geotree{
 
   class Relation{
@@ -25,11 +24,11 @@ namespace geotree{
 
     Relation(){};
 
-    geotree::RelationType_t Child() { return geotree::RelationType_t::kChild; }
+    RelationType_t Child() { return geotree::RelationType_t::kChild; }
 
-    geotree::RelationType_t Sibling() { return geotree::RelationType_t::kSibling; }
+    RelationType_t Sibling() { return geotree::RelationType_t::kSibling; }
 
-    geotree::RelationType_t Parent() { return geotree::RelationType_t::kParent; }
+    RelationType_t Parent() { return geotree::RelationType_t::kParent; }
 
   };
 

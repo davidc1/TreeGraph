@@ -48,9 +48,9 @@ namespace geotree{
     Correlation(double s, ::geoalgo::Point_t vtx, ::geotree::RelationType_t type);
     
     /// Getters
-    double Score() { return _score; }
-    ::geoalgo::Point_t Vtx() { return _vtx; }
-    ::geotree::RelationType_t Relation() { return _type; }
+    const double Score() const { return _score; }
+    const ::geoalgo::Point_t Vtx() const { return _vtx; }
+    const ::geotree::RelationType_t Relation() const { return _type; }
 
     /// Default destructor
     virtual ~Correlation(){}

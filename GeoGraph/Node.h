@@ -24,6 +24,8 @@ typedef size_t NodeID_t;
 
 namespace geotree{
 
+  class Manager;
+
   /**
      \class geotree::Node
      User defined class geograph::Node
@@ -35,11 +37,22 @@ namespace geotree{
   */
 
   class Node{
-    
-  public:
 
     // Manager is a friend of Node
-    friend class Manager;
+    ///friend class ::geotree::Manager;
+
+  public:
+
+    // Constructors are private -> only accessed by Manager friend class
+    /// Default constructor
+    Node(){}
+
+    //Node(const Node& orig) : Node() {std::cout<<"copy ctor"<<std::endl;}
+
+    /// Constructor
+    Node(size_t n) { _node_id = n; _debug = false; }
+    
+  public:
 
     /// Default destructor
     virtual ~Node(){}
@@ -53,25 +66,23 @@ namespace geotree{
     /// getter for children
     const std::vector<NodeID_t>& childrenID() const { return _child_id_v; }
 
-
-
     //*********************************
     // 3 maps for correlation is stupid
     // Change this to a struct!!!!!!!!!
     //*********************************
     
     /// getter for correlations
-    const std::map<NodeID_t, double>& getCorrScores() { return _corrScores; }
-    const std::map<NodeID_t, ::geoalgo::Vector_t>& getCorrVtx() { return _corrVtx; }
-    const std::map<NodeID_t, geotree::RelationType_t>& getCorrType() { return _corrType; }
+    const std::map<NodeID_t, ::geotree::Correlation>& getCorrelations() { return _corr; }
+    //const std::map<NodeID_t, double>& getCorrScores() { return _corrScores; }
+    //const std::map<NodeID_t, ::geoalgo::Vector_t>& getCorrVtx() { return _corrVtx; }
+    //const std::map<NodeID_t, geotree::RelationType_t>& getCorrType() { return _corrType; }
 
-    /// getters for individual correlation objects
-    const double getCorrScore(NodeID_t n) { return _corrScores[n]; }
-    const ::geoalgo::Vector_t getCorrVtx(NodeID_t n) { return _corrVtx[n]; }
-    const geotree::RelationType_t getCorrType(NodeID_t n) { return _corrType[n]; }
-
-    /// get score (if exists)
-    double getScore(NodeID_t node);
+    /// get score (if corr exists)
+    const double getScore(NodeID_t node);
+    /// get vertex (if corr exists)
+    const ::geoalgo::Point_t getVtx(NodeID_t node);
+    /// get relation type (if corr exists)
+    const ::geotree::RelationType_t getRelation(NodeID_t node);
     
     /// erase elements for correlation maps
     void eraseCorrelation(const NodeID_t node);
@@ -99,15 +110,11 @@ namespace geotree{
     /// Check if this node is correlated with another. Boolean return
     bool isCorrelated(NodeID_t id);
 
-  private:
+
+ public:
+    //private:
 
 
-    // Constructors are private -> only accessed by Manager friend class
-    /// Default constructor
-    Node() {_node_id = 0; }
-
-    /// Constructor
-    Node(size_t n) { _node_id = n; _debug = false; }
 
     // Setters are also private : used by friend-class Manager only
 
@@ -151,9 +158,10 @@ namespace geotree{
     geoalgo::Point_t _vtx;
     // each node can have a list of "correlated" nodes
     // each correlated node comes with a score
-    std::map<NodeID_t, double> _corrScores;
-    std::map<NodeID_t, ::geoalgo::Vector_t> _corrVtx;
-    std::map<NodeID_t, geotree::RelationType_t> _corrType;
+    std::map<size_t, ::geotree::Correlation> _corr;
+    //std::map<NodeID_t, double> _corrScores;
+    //std::map<NodeID_t, ::geoalgo::Vector_t> _corrVtx;
+    //std::map<NodeID_t, geotree::RelationType_t> _corrType;
     //std::map<NodeID_t, std::pair<double,::geoalgo::Vector_t> > _correlated;
 
 

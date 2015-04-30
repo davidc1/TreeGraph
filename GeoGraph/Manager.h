@@ -128,7 +128,7 @@ namespace geotree{
     bool _loose;
 
     /// a vector to hold all nodes in the envet
-    std::vector<geotree::Node> _node_v;
+    std::vector< ::geotree::Node> _node_v;
 
     /// keep track of the indices of primary nodes
     std::deque<NodeID_t> _head_node_v;
