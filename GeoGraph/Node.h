@@ -14,7 +14,7 @@
 #ifndef NODE_H
 #define NODE_H
 
-#include "GeoAlgo/GeoVector.h"
+#include "Correlation.h"
 #include <map>
 #include <string>
 
@@ -23,13 +23,6 @@ typedef size_t NodeID_t;
 
 
 namespace geotree{
-
-
-  enum RelationType_t {
-    kParent,
-    kChild,
-    kSibling
-  };
 
   /**
      \class geotree::Node
@@ -44,51 +37,23 @@ namespace geotree{
   class Node{
     
   public:
-    
-    /// Default constructor
-    Node() {_node_id = 0; }
 
-    /// Constructor
-    Node(size_t n) { _node_id = n; _debug = false; }
-    
+    // Manager is a friend of Node
+    friend class Manager;
+
     /// Default destructor
     virtual ~Node(){}
-
+    
     /// getter for ID
-    NodeID_t ID() const { return _node_id; }
+    const NodeID_t ID() { return _node_id; }
 
     /// getter for parent ID
-    NodeID_t parentID() const { return _parent_id; }
+    const NodeID_t parentID() { return _parent_id; }
 
     /// getter for children
     const std::vector<NodeID_t>& childrenID() const { return _child_id_v; }
 
-    /// Add child
-    void addChild(NodeID_t id) { _child_id_v.push_back(id); }
 
-    /// Set Parent
-    void setParent(NodeID_t id) { _parent_id = id; }
-
-    /// Add a correlated node and the associated score & vtx info
-    void addCorrelation(const NodeID_t id, const double score,
-    			const ::geoalgo::Point_t& vtx,
-			const geotree::RelationType_t type);
-
-    /// edit a correlated node's information (score, vtx, type)
-    void editCorrelation(const NodeID_t id, const double score,
-			 const ::geoalgo::Point_t& vtx,
-			 const geotree::RelationType_t type);
-
-    /// edit a correlated node's information (score)
-    void editCorrelation(const NodeID_t id, const double score);
-
-    /// edit a correlated node's information (vtx)
-    void editCorrelation(const NodeID_t id,
-			 const ::geoalgo::Point_t& vtx);
-
-    /// edit a correlated node's information (type)
-    void editCorrelation(const NodeID_t id,
-			 const geotree::RelationType_t type);
 
     //*********************************
     // 3 maps for correlation is stupid
@@ -136,6 +101,43 @@ namespace geotree{
 
   private:
 
+
+    // Constructors are private -> only accessed by Manager friend class
+    /// Default constructor
+    Node() {_node_id = 0; }
+
+    /// Constructor
+    Node(size_t n) { _node_id = n; _debug = false; }
+
+    // Setters are also private : used by friend-class Manager only
+
+    /// Add child
+    void addChild(NodeID_t id) { _child_id_v.push_back(id); }
+
+    /// Set Parent
+    void setParent(NodeID_t id) { _parent_id = id; }
+
+    /// Add a correlated node and the associated score & vtx info
+    void addCorrelation(const NodeID_t id, const double score,
+    			const ::geoalgo::Point_t& vtx,
+			const geotree::RelationType_t type);
+
+    /// edit a correlated node's information (score, vtx, type)
+    void editCorrelation(const NodeID_t id, const double score,
+			 const ::geoalgo::Point_t& vtx,
+			 const geotree::RelationType_t type);
+
+    /// edit a correlated node's information (score)
+    void editCorrelation(const NodeID_t id, const double score);
+
+    /// edit a correlated node's information (vtx)
+    void editCorrelation(const NodeID_t id,
+			 const ::geoalgo::Point_t& vtx);
+
+    /// edit a correlated node's information (type)
+    void editCorrelation(const NodeID_t id,
+			 const geotree::RelationType_t type);
+    
     // debug flag
     bool _debug;
     
