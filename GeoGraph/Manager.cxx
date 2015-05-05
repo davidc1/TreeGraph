@@ -405,31 +405,6 @@ namespace geotree{
 	EraseCorrelation((corrit->first).first,(corrit->first).second);
     }// for correlations returned by the algorithm
 
-    /*
-    if (_verbose) { std::cout << "\tfound " << parentIDs.size() << " parents" << std::endl; }
-
-    // if multiple parents erase all but the one with the highest score
-    if (parentIDs.size() > 1){
-      NodeID_t bestParent = 0;
-      double bestScore = 0;
-      for (size_t i=0; i < parentScores.size(); i++){
-	if (_verbose) { std::cout << "\t\tParent ID: " << parentIDs[i] << "\tScore: " << parentScores[i] << std::endl; }
-	if (parentScores[i] > bestScore){
-	  bestScore = parentScores[i];
-	  bestParent = parentIDs[i];
-	}
-      }
-      // best parent is that at position i
-      for (auto const& pID : parentIDs){
-	if (pID != bestParent){
-	  if (_verbose) { std::cout << "\t\terasing corr. between " << pID << " and " << ID << std::endl; }
-	  // not the best -> eliminate!
-	  EraseCorrelation(ID,pID);
-	}
-      }
-
-    }// if more than 1 parents
-    */
     return;
   }
 
