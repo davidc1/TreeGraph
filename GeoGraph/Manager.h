@@ -14,7 +14,6 @@
 #ifndef MANAGER_H
 #define MANAGER_H
 
-#include <deque>
 #include "GeoAlgo/GeoAlgo.h" //-> for bounding sphere
 #include "NodeCollection.h"      //-> where nodes are stored
 
@@ -37,31 +36,19 @@ namespace geotree{
     virtual ~Manager(){}
 
     /// Reset function
-    void Reset() { _node_v.clear(); _head_node_v.clear(); _node_map.clear(); }
+    void Reset() { _coll.Reset(); }
 
     /// Set Objects (TEMP)
     void setObjects(size_t n);
 
     /// Search the index map
-    NodeID_t FindID(size_t idx);
+    NodeID_t FindID(size_t idx) { return _coll.FindID(idx); }
 
     /// Function to call when to make tree
     void MakeTree();
 
-    /// Function to move a node
-    void MoveNode(const NodeID_t tomove,const NodeID_t endpos);
-
-    /// Function to get a node (const)
-    const Node GetNode(NodeID_t id);
-
-    /// Function to get a node (writeable)
-    Node& GetWriteableNode(NodeID_t id);
-
-    /// Function to print out a node's diagram
-    void Diagram(NodeID_t id, int gen=0);
-
     /// Function to print out full diagram for nodes in manager
-    void Diagram();
+    void Diagram() { _coll.Diagram(); }
 
     /// Function to find node in _head_node_v. Return true if found
     bool NodeAdded(NodeID_t n);
@@ -100,7 +87,7 @@ namespace geotree{
     void ResolveConflicts();
 
     /// setter for verbosity
-    void setVerbose(bool on) { _verbose = on; }
+    void setVerbose(bool on) { _verbose = on; _coll.SetVerbose(on); }
     
     /// setter for looseness
     void setLoose(bool on) { _loose = on; }
@@ -131,18 +118,6 @@ namespace geotree{
     /// collection that stores the nodes
     NodeCollection _coll;
     
-    /// a vector to hold all nodes in the envet
-    std::vector< ::geotree::Node> _node_v;
-
-    /// keep track of the indices of primary nodes
-    std::deque<NodeID_t> _head_node_v;
-
-    /// map to link node ID to position in node vector
-    std::map<NodeID_t, size_t> _node_map;
-
-    /// map to link position in node vector with ID
-    std::map<size_t, NodeID_t> _index_map;
-
     /// function to find best parent for all nodes
     void FindBestParent();
 

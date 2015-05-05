@@ -52,7 +52,7 @@ namespace geotree{
     //Node(const Node& orig) : Node() {std::cout<<"copy ctor"<<std::endl;}
 
     /// Constructor
-    Node(size_t n) { _node_id = n; _debug = false; }
+    Node(size_t n) { _node_id = n; _verbose = false; }
     
   public:
 
@@ -75,9 +75,6 @@ namespace geotree{
     
     /// getter for correlations
     const std::map<NodeID_t, ::geotree::Correlation>& getCorrelations() const { return _corr; }
-    //const std::map<NodeID_t, double>& getCorrScores() { return _corrScores; }
-    //const std::map<NodeID_t, ::geoalgo::Vector_t>& getCorrVtx() { return _corrVtx; }
-    //const std::map<NodeID_t, geotree::RelationType_t>& getCorrType() { return _corrType; }
 
     /// get score (if corr exists)
     double getScore(NodeID_t node);
@@ -107,7 +104,7 @@ namespace geotree{
     bool hasConflict() const;
 
     /// debug setter
-    void setDebug(bool on) { _debug = on; }
+    void setVerbose(bool on) { _verbose = on; }
 
     /// Check if this node is correlated with another. Boolean return
     bool isCorrelated(NodeID_t id);
@@ -146,8 +143,8 @@ namespace geotree{
 
   private:
     
-    // debug flag
-    bool _debug;
+    // verbosity flag
+    bool _verbose;
     
     // unique ID that identifies this node
     NodeID_t _node_id;
@@ -160,11 +157,6 @@ namespace geotree{
     // each node can have a list of "correlated" nodes
     // each correlated node comes with a score
     std::map<size_t, ::geotree::Correlation> _corr;
-    //std::map<NodeID_t, double> _corrScores;
-    //std::map<NodeID_t, ::geoalgo::Vector_t> _corrVtx;
-    //std::map<NodeID_t, geotree::RelationType_t> _corrType;
-    //std::map<NodeID_t, std::pair<double,::geoalgo::Vector_t> > _correlated;
-
 
 
   };
