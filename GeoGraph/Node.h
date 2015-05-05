@@ -109,10 +109,14 @@ namespace geotree{
     /// Check if this node is correlated with another. Boolean return
     bool isCorrelated(NodeID_t id);
 
+    /// Add a prohibit relation to this node
+    void addProhibit(::geotree::RelationType_t rel) { _prohibits.push_back(rel); }
 
-    // public:
+    /// Check if the node has any prohibit relations
+    bool hasProhibit() { bool has=false; (_prohibits.size() > 0) ? has = true : has = false; return has; }
 
-    // Setters are also private : used by friend-class Manager only
+    /// check if a specific relation is prohibited
+    bool isProhibited(::geotree::RelationType_t rel);
 
     /// Add child
     void addChild(NodeID_t id) { _child_id_v.push_back(id); }
@@ -157,6 +161,12 @@ namespace geotree{
     // each node can have a list of "correlated" nodes
     // each correlated node comes with a score
     std::map<size_t, ::geotree::Correlation> _corr;
+
+    // keep track of the prohibits for this node
+    // prohibits is a list of relations that this
+    // node should not support
+    // i.e. a primary node should not have a kParent relation
+    std::vector<::geotree::RelationType_t> _prohibits;
 
 
   };

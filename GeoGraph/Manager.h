@@ -14,8 +14,10 @@
 #ifndef MANAGER_H
 #define MANAGER_H
 
-#include "GeoAlgo/GeoAlgo.h" //-> for bounding sphere
-#include "NodeCollection.h"      //-> where nodes are stored
+#include "GeoAlgo/GeoAlgo.h"         //-> for bounding sphere
+#include "NodeCollection.h"          //-> where nodes are stored
+//#include "AlgoMultipleParentsBase.h" //-> algorithm to resolve conflict due to multiple parents
+#include "AlgoMultipleParentsHighScore.h"
 
 namespace geotree{
 
@@ -30,7 +32,7 @@ namespace geotree{
   public:
 
     /// Default constructor
-    Manager(){ _verbose = false; _loose = true; }
+    Manager();
 
     /// Default destructor
     virtual ~Manager(){}
@@ -87,7 +89,7 @@ namespace geotree{
     void ResolveConflicts();
 
     /// setter for verbosity
-    void setVerbose(bool on) { _verbose = on; _coll.SetVerbose(on); }
+    void setVerbose(bool on) { _verbose = on; _coll.SetVerbose(on); _algoMultipleParents->SetVerbose(on); }
     
     /// setter for looseness
     void setLoose(bool on) { _loose = on; }
@@ -129,6 +131,9 @@ namespace geotree{
 
     /// geoalgo instance to find "average" vertex
     ::geoalgo::GeoAlgo _geoAlgo;
+
+    /// multiple parents algorithm
+    AlgoMultipleParentsHighScore* _algoMultipleParents;
 
   };
 }

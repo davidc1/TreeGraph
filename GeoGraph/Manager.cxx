@@ -5,9 +5,23 @@
 
 namespace geotree{
 
+
+  // Constructor
+  Manager::Manager() :
+    _algoMultipleParents(nullptr)
+  {
+    
+    _verbose = false;
+    _loose   = false;
+
+    if (_algoMultipleParents) { delete _algoMultipleParents; }
+    _algoMultipleParents = new AlgoMultipleParentsHighScore(&_coll);
+
+  }
+  
   // Node initializer: create a node for each object
   void Manager::setObjects(size_t n){
-
+  
     if (_verbose) { std::cout << "Setting " << n << " objects to prepare tree" << std::endl; }
     //_node_v.resize(_node_v.size()+n);
     for (size_t i=0; i < n; i++){
@@ -16,9 +30,10 @@ namespace geotree{
       _coll.AddNode(nID);
       if (_verbose) { std::cout << "Created Node Num. " << i << "/" << n <<" with ID " << nID << std::endl; }
     }
+
     return;
   }
-
+  
 
   // Function to be called when Trees will be made
   void Manager::MakeTree(){
@@ -91,10 +106,10 @@ namespace geotree{
 	  }//for all siblings
 	}// if multiple siblings
 	// create new node to host the new siblings
-	NodeID_t id = ID*100+siblings[0]*1000+1; 
+	NodeID_t id = ID*10+siblings[0]*100+1; 
 	// Make sure this ID does not exist
 	if (_coll.NodeExists(id) == true)
-	  throw ::geoalgo::GeoAlgoException("About to create a NodeID that already exists. Not acceptable!");
+	  throw ::geoalgo::GeoAlgoException(Form("About to create a NodeID that already exists (%u). Not acceptable!",id));
 	_coll.AddNode(id);
 	// add child nodes to newly created node
 	_coll.GetNode(id).addChild(ID);
@@ -120,9 +135,6 @@ namespace geotree{
   }
 
 
-
-
-
   // Correlation provided indicates relationship between node id1 and node id2
   void Manager::AddCorrelation(const NodeID_t id1, const NodeID_t id2,
 			       const double score,
@@ -135,9 +147,6 @@ namespace geotree{
     if (_coll.NodeExists(id2) == false)
       throw ::geoalgo::GeoAlgoException("Node ID not found!");
 
-    if (_verbose) { std::cout << "\tAdding Correlation..." << std::endl; }
-    _coll.GetNode(id2).addCorrelation(id1,score,vtx,type);
-
     //type returned is the relation of 1 w.r.t. 2
     // find "inverse" relation to assign to 2 w.r.t. 1
     geotree::RelationType_t otherRel = geotree::RelationType_t::kUnknown;
@@ -147,7 +156,16 @@ namespace geotree{
       otherRel = geotree::RelationType_t::kParent;
     else if (type == geotree::RelationType_t::kParent)
       otherRel = geotree::RelationType_t::kChild;
-    
+
+    // make sure this relation is not prohibited
+    if ( _coll.GetNode(id1).isProhibited(otherRel) ||
+	 _coll.GetNode(id2).isProhibited(type) ){
+      if (_verbose) { std::cout << "\tCorrelation is Prohibited!" << std::endl; }
+      return;
+    }
+
+    if (_verbose) { std::cout << "\tAdding Correlation..." << std::endl; }
+    _coll.GetNode(id2).addCorrelation(id1,score,vtx,type);    
     _coll.GetNode(id1).addCorrelation(id2,score,vtx,otherRel);
 
     return;
@@ -165,9 +183,6 @@ namespace geotree{
     if (_coll.NodeExists(id2) == false)
       throw ::geoalgo::GeoAlgoException("Node ID not found!");
 
-    if (_verbose) { std::cout << "\tEditing Correlation..." << std::endl; }
-    _coll.GetNode(id2).editCorrelation(id1,score,vtx,type);
-
     //type returned is the relation of 1 w.r.t. 2
     // find "inverse" relation to assign to 2 w.r.t. 1
     geotree::RelationType_t otherRel = geotree::RelationType_t::kUnknown;
@@ -177,7 +192,16 @@ namespace geotree{
       otherRel = geotree::RelationType_t::kParent;
     else if (type == geotree::RelationType_t::kParent)
       otherRel = geotree::RelationType_t::kChild;
-    
+
+    // make sure this relation is not prohibited
+    if ( _coll.GetNode(id1).isProhibited(otherRel) ||
+	 _coll.GetNode(id2).isProhibited(type) ){
+      if (_verbose) { std::cout << "\tCorrelation is Prohibited!" << std::endl; }
+      return;
+    }
+
+    if (_verbose) { std::cout << "\tEditing Correlation..." << std::endl; }
+    _coll.GetNode(id2).editCorrelation(id1,score,vtx,type);    
     _coll.GetNode(id1).editCorrelation(id2,score,vtx,otherRel);
 
     return;
@@ -227,9 +251,6 @@ namespace geotree{
     if (_coll.NodeExists(id2) == false)
       throw ::geoalgo::GeoAlgoException("Node ID not found!");
 
-    if (_verbose) { std::cout << "\tEditing Correlation Relation..." << std::endl; }
-    _coll.GetNode(id2).editCorrelation(id1,type);
-
     //type returned is the relation of 1 w.r.t. 2
     // find "inverse" relation to assign to 2 w.r.t. 1
     geotree::RelationType_t otherRel = geotree::RelationType_t::kUnknown;
@@ -239,7 +260,16 @@ namespace geotree{
       otherRel = geotree::RelationType_t::kParent;
     else if (type == geotree::RelationType_t::kParent)
       otherRel = geotree::RelationType_t::kChild;
-    
+
+    // make sure this relation is not prohibited
+    if ( _coll.GetNode(id1).isProhibited(otherRel) ||
+	 _coll.GetNode(id2).isProhibited(type) ){
+      if (_verbose) { std::cout << "\tCorrelation is Prohibited!" << std::endl; }
+      return;
+    }
+
+    if (_verbose) { std::cout << "\tEditing Correlation Relation..." << std::endl; }
+    _coll.GetNode(id2).editCorrelation(id1,type);
     _coll.GetNode(id1).editCorrelation(id2,otherRel);
 
     return;
@@ -343,7 +373,7 @@ namespace geotree{
     //auto const cScores = _node_v[_node_map[ID]].getCorrScores();
 
     // vector where to hold parent IDs
-    std::vector<size_t> parentIDs;
+    std::vector<NodeID_t> parentIDs;
     // vector where to hold parent scores
     std::vector<double> parentScores;
 
@@ -356,6 +386,26 @@ namespace geotree{
       }
     }
 
+    // if < 1 parent -> continue
+    if (parentIDs.size() < 2)
+      return;
+
+    // Ok, let's give the algorithm a shot! 
+    // call the algorithm with node & vector of parent nodes
+    if (_verbose) { std::cout << "\talgoMultipleParents called..." << std::endl; }
+    _algoMultipleParents->FindBestParent(ID,parentIDs);
+
+    // now loop through correlations found and act on them
+    auto const algoCorrs = _algoMultipleParents->GetCorrelations();
+    
+    std::map< std::pair<NodeID_t,NodeID_t>, geotree::Correlation >::const_iterator corrit;
+    for (corrit = algoCorrs.begin(); corrit != algoCorrs.end(); corrit++){
+      // if correlation's score is negative -> remove
+      if (corrit->second.Score() < 0)
+	EraseCorrelation((corrit->first).first,(corrit->first).second);
+    }// for correlations returned by the algorithm
+
+    /*
     if (_verbose) { std::cout << "\tfound " << parentIDs.size() << " parents" << std::endl; }
 
     // if multiple parents erase all but the one with the highest score
@@ -379,7 +429,7 @@ namespace geotree{
       }
 
     }// if more than 1 parents
-    
+    */
     return;
   }
 

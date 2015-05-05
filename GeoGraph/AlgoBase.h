@@ -15,6 +15,7 @@
 #define ALGOBASE_H
 
 #include "Correlation.h"
+#include "NodeCollection.h"
 #include "Node.h"
 #include <vector>
 #include "string.h"
@@ -25,26 +26,39 @@ namespace geotree{
 
   public:
     
-    AlgoBase() { _name=""; }
+    AlgoBase() { _name=""; _verbose = false; }
+
+    /// Constructor which syncs node collection for the algorithm
+    AlgoBase(NodeCollection* coll) { _name=""; _coll = coll; _verbose = false; }
 
     virtual ~AlgoBase(){}
 
     /// Getter for the correlations erased/modified/added by algo
-    virtual std::vector<geotree::Correlation> GetCorrelations() { return _corr_v; }
+    virtual std::map< std::pair<NodeID_t, NodeID_t>, geotree::Correlation> GetCorrelations() { return _corr_v; }
 
     /// clear correlations. To be called every time aglorithm is applied to a node
     virtual void ClearCorrelations() { _corr_v.clear(); }
 
     /// Function that sorts conflicts
-    virtual void Apply(NodeID_t ID, const std::vector<::geotree::Node>& node_v) { return; }
+    virtual void Apply(const NodeID_t ID, const std::vector<::geotree::Node>& node_v) { return; }
+
+    /// set verbosity
+    void SetVerbose(bool on) { _verbose = on; }
 
   protected:
+
+    // verbosity flag
+    bool _verbose;
     
     // Algo's name
     std::string _name;
 
-    // vector of correlations
-    std::vector<geotree::Correlation> _corr_v;
+    // map for correlations
+    // connects a pair of nodes to a correlation type
+    std::map< std::pair<NodeID_t, NodeID_t>, geotree::Correlation> _corr_v;
+
+    // pointer to collection reference
+    NodeCollection* _coll;
 
   };
 }

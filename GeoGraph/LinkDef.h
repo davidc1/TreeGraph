@@ -16,7 +16,8 @@
 #pragma link C++ class geotree::Manager+;
 #pragma link C++ class geotree::Relation+;
 #pragma link C++ class geotree::AlgoBase+;
-#pragma link C++ class geotree::AlgoMultipleParents+;
+//#pragma link C++ class geotree::AlgoMultipleParentsBase+;
+#pragma link C++ class geotree::AlgoMultipleParentsHighScore+;
 #pragma link C++ class std::vector<geotree::Node>+;
 //ADD_NEW_CLASS ... do not change this line
 #endif

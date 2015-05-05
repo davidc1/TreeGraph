@@ -286,6 +286,17 @@ namespace geotree{
     return false;
   }
 
+  /// check if a specific relation type is prohibited
+  bool Node::isProhibited(::geotree::RelationType_t rel){
+
+    for (size_t i=0; i < _prohibits.size(); i++){
+      if (_prohibits[i] == rel)
+	return true;
+    }
+
+    return false;
+  }
+
 }
 
 #endif
