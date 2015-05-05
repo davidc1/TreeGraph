@@ -14,9 +14,10 @@
 #ifndef MANAGER_H
 #define MANAGER_H
 
-#include "Node.h"
 #include <deque>
 #include "GeoAlgo/GeoAlgo.h" //-> for bounding sphere
+#include "NodeCollection.h"      //-> where nodes are stored
+
 namespace geotree{
 
   /**
@@ -109,13 +110,13 @@ namespace geotree{
     void SortSiblings();
     void SortSiblings(NodeID_t ID);
     /// function to resolve case in which node has both sibling and parent -> right now do nothing
-    void SortSiblingsAndParent();
-    void SortSiblingsAndParent(NodeID_t ID);
+    //void SortSiblingsAndParent();
+    //void SortSiblingsAndParent(NodeID_t ID);
     void ResolveSiblingsWithDifferentParent(NodeID_t ID);
     void ParentAndSiblingAreNotLogicallyConsistent();
     void ParentAndSiblingAreNotLogicallyConsistent(NodeID_t ID);
-    void SiblingDoesNotHaveSameParent();
-    void SiblingDoesNotHaveSameParent(NodeID_t ID);
+    //void SiblingDoesNotHaveSameParent();
+    //void SiblingDoesNotHaveSameParent(NodeID_t ID);
     void IfConflictRemoveSibling();
     void IfConflictRemoveSibling(NodeID_t ID);
   private:
@@ -127,6 +128,9 @@ namespace geotree{
     /// rather than picking the best one (e.g. multiple siblings)
     bool _loose;
 
+    /// collection that stores the nodes
+    NodeCollection _coll;
+    
     /// a vector to hold all nodes in the envet
     std::vector< ::geotree::Node> _node_v;
 

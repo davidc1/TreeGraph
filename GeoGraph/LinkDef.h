@@ -10,9 +10,13 @@
 #pragma link off all functions;
 
 #pragma link C++ namespace geotree+;
+#pragma link C++ class geotree::Correlation+;
+#pragma link C++ class geotree::NodeCollection+;
 #pragma link C++ class geotree::Node+;
 #pragma link C++ class geotree::Manager+;
 #pragma link C++ class geotree::Relation+;
+#pragma link C++ class geotree::AlgoBase+;
+#pragma link C++ class geotree::AlgoMultipleParents+;
 #pragma link C++ class std::vector<geotree::Node>+;
 //ADD_NEW_CLASS ... do not change this line
 #endif

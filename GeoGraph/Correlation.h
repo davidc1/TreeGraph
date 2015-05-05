@@ -26,7 +26,7 @@ namespace geotree{
   };
   
   /**
-     \class geotree::Node
+     \class geotree::Correlation
      User defined class geograph::Correlation
      A correlation is a simple structure
      that uniquely defines the correlation
@@ -48,9 +48,9 @@ namespace geotree{
     Correlation(double s, ::geoalgo::Point_t vtx, ::geotree::RelationType_t type);
     
     /// Getters
-    const double Score() const { return _score; }
-    const ::geoalgo::Point_t Vtx() const { return _vtx; }
-    const ::geotree::RelationType_t Relation() const { return _type; }
+    double Score() const { return _score; }
+    ::geoalgo::Point_t Vtx() const { return _vtx; }
+    ::geotree::RelationType_t Relation() const { return _type; }
 
     /// Default destructor
     virtual ~Correlation(){}

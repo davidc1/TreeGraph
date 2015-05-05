@@ -25,6 +25,7 @@ typedef size_t NodeID_t;
 namespace geotree{
 
   class Manager;
+  class NodeCollection;
 
   /**
      \class geotree::Node
@@ -39,9 +40,10 @@ namespace geotree{
   class Node{
 
     // Manager is a friend of Node
-    ///friend class ::geotree::Manager;
+    friend class ::geotree::Manager;
+    friend class ::geotree::NodeCollection;
 
-  public:
+  private:
 
     // Constructors are private -> only accessed by Manager friend class
     /// Default constructor
@@ -58,10 +60,10 @@ namespace geotree{
     virtual ~Node(){}
     
     /// getter for ID
-    const NodeID_t ID() { return _node_id; }
+    NodeID_t ID() const { return _node_id; }
 
     /// getter for parent ID
-    const NodeID_t parentID() { return _parent_id; }
+    NodeID_t parentID() const { return _parent_id; }
 
     /// getter for children
     const std::vector<NodeID_t>& childrenID() const { return _child_id_v; }
@@ -72,17 +74,17 @@ namespace geotree{
     //*********************************
     
     /// getter for correlations
-    const std::map<NodeID_t, ::geotree::Correlation>& getCorrelations() { return _corr; }
+    const std::map<NodeID_t, ::geotree::Correlation>& getCorrelations() const { return _corr; }
     //const std::map<NodeID_t, double>& getCorrScores() { return _corrScores; }
     //const std::map<NodeID_t, ::geoalgo::Vector_t>& getCorrVtx() { return _corrVtx; }
     //const std::map<NodeID_t, geotree::RelationType_t>& getCorrType() { return _corrType; }
 
     /// get score (if corr exists)
-    const double getScore(NodeID_t node);
+    double getScore(NodeID_t node);
     /// get vertex (if corr exists)
-    const ::geoalgo::Point_t getVtx(NodeID_t node);
+    ::geoalgo::Point_t getVtx(NodeID_t node);
     /// get relation type (if corr exists)
-    const ::geotree::RelationType_t getRelation(NodeID_t node);
+    ::geotree::RelationType_t getRelation(NodeID_t node);
     
     /// erase elements for correlation maps
     void eraseCorrelation(const NodeID_t node);
@@ -111,10 +113,7 @@ namespace geotree{
     bool isCorrelated(NodeID_t id);
 
 
- public:
-    //private:
-
-
+    // public:
 
     // Setters are also private : used by friend-class Manager only
 
@@ -144,6 +143,8 @@ namespace geotree{
     /// edit a correlated node's information (type)
     void editCorrelation(const NodeID_t id,
 			 const geotree::RelationType_t type);
+
+  private:
     
     // debug flag
     bool _debug;

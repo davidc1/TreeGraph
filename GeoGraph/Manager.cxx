@@ -5,22 +5,23 @@
 
 namespace geotree{
 
-  // A temporary function to create some crappy nodes
-  // to do some testing...TEMP
+  // Node initializer: create a node for each object
   void Manager::setObjects(size_t n){
+
+    _coll.Clear();
 
     if (_verbose) { std::cout << "Setting " << n << " objects to prepare tree" << std::endl; }
     //_node_v.resize(_node_v.size()+n);
-
     for (size_t i=0; i < n; i++){
       // Assign an ID double the element number. Just because
       size_t nID = i*2;
       //std::cout << "creating node " << nID << std::endl;
-      //Node thisnode(nID);
+      _coll.AddNode(nID);
+      Node thisnode(nID);
       //std::cout << "setting debug " << std::endl;
-      //thisnode.setDebug(_verbose);
+      thisnode.setDebug(_verbose);
       //std::cout << "pushing back " << std::endl;
-      _node_v.emplace_back(nID);
+      _node_v.emplace_back(thisnode);
       //_node_v[i]=thisnode;
       //std::cout << "done " << std::endl;
       size_t idx = _node_v.size()-1; // index in vector for this node
@@ -262,7 +263,7 @@ namespace geotree{
 
     //type returned is the relation of 1 w.r.t. 2
     // find "inverse" relation to assign to 2 w.r.t. 1
-    geotree::RelationType_t otherRel;
+    geotree::RelationType_t otherRel = geotree::RelationType_t::kUnknown;
     if (type == geotree::RelationType_t::kSibling)
       otherRel = geotree::RelationType_t::kSibling;
     else if (type == geotree::RelationType_t::kChild)
@@ -292,7 +293,7 @@ namespace geotree{
 
     //type returned is the relation of 1 w.r.t. 2
     // find "inverse" relation to assign to 2 w.r.t. 1
-    geotree::RelationType_t otherRel;
+    geotree::RelationType_t otherRel = geotree::RelationType_t::kUnknown;
     if (type == geotree::RelationType_t::kSibling)
       otherRel = geotree::RelationType_t::kSibling;
     else if (type == geotree::RelationType_t::kChild)
@@ -354,7 +355,7 @@ namespace geotree{
 
     //type returned is the relation of 1 w.r.t. 2
     // find "inverse" relation to assign to 2 w.r.t. 1
-    geotree::RelationType_t otherRel;
+    geotree::RelationType_t otherRel = geotree::RelationType_t::kUnknown;
     if (type == geotree::RelationType_t::kSibling)
       otherRel = geotree::RelationType_t::kSibling;
     else if (type == geotree::RelationType_t::kChild)
@@ -607,7 +608,7 @@ namespace geotree{
     // if instead one should just select the best vertex
     else{
       double maxScore = 0.;
-      NodeID_t bestSibling;
+      NodeID_t bestSibling = -1;
       for (auto& sID : siblings){
 	double score = _node_v[_node_map[ID]].getScore(sID);
 	if (score > maxScore){
@@ -626,7 +627,7 @@ namespace geotree{
     return;
   }
 
-
+  /*
   // Sort all SiblingsAndParent
   void Manager::SortSiblingsAndParent(){
 
@@ -760,6 +761,7 @@ namespace geotree{
     }// if not everything is ok and we need to resolve conflicts
     return;
   }
+  */
 
   // Resolve conflict with a sibling having a different parent
   // if two siblings have different parent we need to choose 
@@ -779,7 +781,6 @@ namespace geotree{
     
     // get parent
     auto const parentID = _node_v[_node_map[ID]].getParent();
-    auto parentScore    = _node_v[_node_map[ID]].getScore(parentID);
 
     // If a sibling does not have a parent that is fine. This will be solved
     // later in SortSiblingsAndParent
@@ -912,6 +913,7 @@ namespace geotree{
     return;
   }
 
+  /*
   void Manager::SiblingDoesNotHaveSameParent(){
 
     std::map<NodeID_t,size_t>::iterator it;
@@ -968,7 +970,7 @@ namespace geotree{
 
     return;
   }
-
+  */
 
   void Manager::IfConflictRemoveSibling(){
 

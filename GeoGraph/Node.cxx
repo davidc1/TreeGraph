@@ -11,7 +11,7 @@ namespace geotree{
 
     // if correlation exists then return exception!
     if (this->isCorrelated(id) == true)
-      throw ::geoalgo::GeoAlgoException("Error: Adding correlation that already exists!");      
+      throw ::geoalgo::GeoAlgoException("Error: Adding correlation that already exists!");
     
     if (_debug){
       std::cout << "\tThis node: " << this->ID()
@@ -113,7 +113,7 @@ namespace geotree{
     return;
   }
 
-  const double Node::getScore(NodeID_t node)
+  double Node::getScore(NodeID_t node)
   {
 
     if (_corr.find(node) == _corr.end()){
@@ -124,7 +124,7 @@ namespace geotree{
     return _corr[node].Score();
   }
 
-  const ::geoalgo::Point_t Node::getVtx(NodeID_t node)
+  ::geoalgo::Point_t Node::getVtx(NodeID_t node)
   {
 
     if (_corr.find(node) == _corr.end()){
@@ -135,7 +135,7 @@ namespace geotree{
     return _corr[node].Vtx();
   }
 
-  const ::geotree::RelationType_t Node::getRelation(NodeID_t node)
+  ::geotree::RelationType_t Node::getRelation(NodeID_t node)
   {
 
     if (_corr.find(node) == _corr.end()){
@@ -219,7 +219,7 @@ namespace geotree{
   NodeID_t Node::getParent() const
   {
     
-    NodeID_t parent;
+    NodeID_t parent = -1;
     int parents = 0;
 
     std::map<NodeID_t, geotree::Correlation>::const_iterator it;
