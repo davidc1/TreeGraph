@@ -17,6 +17,7 @@
 #include <deque>
 #include "Node.h"
 #include "GeoAlgo/GeoVector.h"
+#include <iomanip> // to pad with zeros
 
 namespace geotree{
 
@@ -61,6 +62,9 @@ namespace geotree{
 
     /// check if the node has been added to the tree
     bool NodeAdded(const NodeID_t ID);
+
+    /// Print correlation matrix for nodes in event
+    void CorrelationMatrix();
 
     /// Print entire diagram
     void Diagram();

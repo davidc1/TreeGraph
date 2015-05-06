@@ -50,6 +50,9 @@ namespace geotree{
     /// Function to call when to make tree
     void MakeTree();
 
+    /// Print correlation matrix
+    void CorrelationMatrix() { _coll.CorrelationMatrix(); }
+
     /// Function to print out full diagram for nodes in manager
     void Diagram() { _coll.Diagram(); }
 

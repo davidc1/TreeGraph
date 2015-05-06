@@ -118,10 +118,15 @@ namespace geotree{
 	// add child nodes to newly created node
 	_coll.GetNode(id).addChild(ID);
 	_coll.GetNode(ID).setParent(id);
+	// also add correlations so they show up on correlation matrix (not too important...)
+	AddCorrelation(id,ID,1.,::geoalgo::Point_t(3),::geotree::RelationType_t::kParent);
 	// loop over siblings and add them
 	for (auto& sib : siblings){ 
+	  // add node parentage
 	  _coll.GetNode(id).addChild(sib);
 	  _coll.GetNode(sib).setParent(id);
+	AddCorrelation(id,sib,1.,::geoalgo::Point_t(3),::geotree::RelationType_t::kParent);
+	  // and correlations
 	}
 	if (_verbose) { std::cout << "\tadding node " << id << " to tree nodes" << std::endl; }
 	_coll.AddPrimaryNode(id);

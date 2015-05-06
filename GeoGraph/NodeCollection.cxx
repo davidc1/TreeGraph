@@ -55,6 +55,62 @@ namespace geotree{
     return found;
   }
 
+  // Print correlation matrix for nodes in this event
+  void NodeCollection::CorrelationMatrix(){
+
+    // sort nodeIDs in order
+    std::vector<NodeID_t> ids = _IDs;
+    std::vector<NodeID_t> ids_sorted;
+    size_t nelements = ids.size();
+    for (size_t n=0; n < nelements; n++){
+      // find smallest ID in vector
+      NodeID_t thisID = 10000;
+      size_t pos = -1;
+      for (size_t i=0; i < ids.size(); i++){
+	if (ids[i] < thisID){
+	  thisID = ids[i];
+	  pos    = i;
+	}// if lowest element left
+      }// for all elements left in ID vector
+      ids_sorted.push_back(thisID);
+      // erase lowest element from copied vector
+      ids.erase(ids.begin()+pos);
+    }// up until everything is erased
+
+    // loop over nodes and for each get its correlations
+    size_t nnodes = ids_sorted.size();
+
+    // print first row: node IDs
+    std::cout << "     |";
+    for (size_t n=0; n < nnodes; n++)
+      std::cout << " " << std::setfill('0') << std::setw(3) << ids_sorted[n] << " |";
+    std::cout << std::endl;
+
+    // each row now holds information for a specific node
+    for (size_t n=0; n < nnodes; n++){
+      std::cout << " " <<  std::setfill('0') << std::setw(3) << ids_sorted[n] << " |";
+      // loop over all nodes. if correlated print out corr type
+      for (size_t m=0; m < nnodes; m++){
+	if (_nodes[_n_map[ids_sorted[n]]].isCorrelated(ids_sorted[m]) == true){
+	  // get correlation type
+	  auto const rel = _nodes[_n_map[ids_sorted[n]]].getRelation(ids_sorted[m]);
+	  if (rel == ::geotree::RelationType_t::kSibling) { std::cout << "  S  |"; }
+	  if (rel == ::geotree::RelationType_t::kParent)  { std::cout << "  P  |"; }
+	  if (rel == ::geotree::RelationType_t::kChild)   { std::cout << "  C  |"; }
+	}// if correlated
+	// if not correlated
+	else { std::cout << "     |"; }
+      }// for all other nodes
+      // new line
+      std::cout << std::endl;
+      //std::cout << "_____";
+      //for (size_t m=0; m < nnodes; m++) { std::cout << "_____"; }
+      //std::cout << std::endl;
+    }// for all nodes
+    
+    return;
+  }
+  
 
   // function to print out full diagram for trees in manager
   void NodeCollection::Diagram(){
