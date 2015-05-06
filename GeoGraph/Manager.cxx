@@ -10,16 +10,21 @@ namespace geotree{
   Manager::Manager()
     : _algoMultipleParents(nullptr)
     , _algoParentIsSiblingsSibling(nullptr)
+    , _algoGenericConflict(nullptr)
   {
     
     _verbose = false;
     _loose   = false;
 
+    // Initialize algorithms used
     if (_algoMultipleParents) { delete _algoMultipleParents; }
     _algoMultipleParents = new AlgoMultipleParentsHighScore(&_coll);
 
     if (_algoParentIsSiblingsSibling) { delete _algoParentIsSiblingsSibling; }
     _algoParentIsSiblingsSibling = new AlgoParentIsSiblingsSibling(&_coll);
+
+    if (_algoGenericConflict) { delete _algoGenericConflict; }
+    _algoGenericConflict = new AlgoGenericConflict(&_coll);
 
   }
   
@@ -333,7 +338,7 @@ namespace geotree{
 
     // if there is a conflict, remove sibling relation
     if (_verbose) { std::cout << "If there is a conflict, remove sibling status" << std::endl; }
-    IfConflictRemoveSibling();
+    GenericConflict();
 
     /*
     // case in which sibling does not have a parent if this ID does
@@ -881,19 +886,19 @@ namespace geotree{
   }
   */
 
-  void Manager::IfConflictRemoveSibling(){
+  void Manager::GenericConflict(){
 
     // Get list of nodes
     auto const IDs = _coll.GetNodeIDs();
 
     for (auto &ID : IDs)
-      IfConflictRemoveSibling(ID);
+      GenericConflict(ID);
 
     return;
   }
 
   // If there is a conflict and siblings don't have the same parent -> remove sibling relation
-  void Manager::IfConflictRemoveSibling(NodeID_t ID){
+  void Manager::GenericConflict(NodeID_t ID){
 
     // if node has parent and sibling
     // do something if sibling does not have a parent
@@ -908,18 +913,21 @@ namespace geotree{
     auto const parentID = _coll.GetNode(ID).getParent();    
 
     for (auto& s : siblings){
-      // if the sibling does not have the same parent -> remove sibling relation
-      if (_coll.GetNode(s).hasParent() == false){
-	if (_verbose) { std::cout << "\tsibling does not have the same parent. Remove sibling realtion " << std::endl; } 
-	EraseCorrelation(ID,s);
-	continue;
-      }
-      if (_coll.GetNode(s).getParent() != parentID){
-	if (_verbose) { std::cout << "\tsibling parent different from this node's parent. Remove sibling realtion " << std::endl; } 
-	EraseCorrelation(ID,s);
-	continue;
-      }
-    }// for all siblings 
+      
+      if (_verbose) { std::cout << "\talgoGenericConflict called..." << std::endl; }
+      _algoGenericConflict->ResolveConflict(ID,parentID,s);
+
+      // now loop through correlations found and act on them
+      auto const algoCorrs = _algoGenericConflict->GetCorrelations();
+    
+      std::map< std::pair<NodeID_t,NodeID_t>, geotree::Correlation >::const_iterator corrit;
+      for (corrit = algoCorrs.begin(); corrit != algoCorrs.end(); corrit++){
+	// if correlation's score is negative -> remove
+	if (corrit->second.Score() < 0)
+	  EraseCorrelation((corrit->first).first,(corrit->first).second);
+      }// for correlations returned by the algorithm
+
+    }// for all siblings
 
     return;
   }

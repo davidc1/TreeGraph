@@ -19,6 +19,7 @@
 //#include "AlgoMultipleParentsBase.h" //-> algorithm to resolve conflict due to multiple parents
 #include "AlgoMultipleParentsHighScore.h"
 #include "AlgoParentIsSiblingsSibling.h"
+#include "AlgoGenericConflict.h"
 
 namespace geotree{
 
@@ -110,8 +111,8 @@ namespace geotree{
     void ParentIsSiblingsSibling(NodeID_t ID);
     //void SiblingDoesNotHaveSameParent();
     //void SiblingDoesNotHaveSameParent(NodeID_t ID);
-    void IfConflictRemoveSibling();
-    void IfConflictRemoveSibling(NodeID_t ID);
+    void GenericConflict();
+    void GenericConflict(NodeID_t ID);
   private:
 
     /// verbosity flag
@@ -139,6 +140,7 @@ namespace geotree{
     /// multiple parents algorithm
     AlgoMultipleParentsHighScore* _algoMultipleParents;
     AlgoParentIsSiblingsSibling*  _algoParentIsSiblingsSibling;
+    AlgoGenericConflict*          _algoGenericConflict;
 
   };
 }

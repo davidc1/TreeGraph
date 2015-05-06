@@ -97,6 +97,7 @@ namespace geotree{
 	  if (rel == ::geotree::RelationType_t::kSibling) { std::cout << "  S  |"; }
 	  if (rel == ::geotree::RelationType_t::kParent)  { std::cout << "  P  |"; }
 	  if (rel == ::geotree::RelationType_t::kChild)   { std::cout << "  C  |"; }
+	  if (rel == ::geotree::RelationType_t::kUnknown) { std::cout << "  U  |"; }
 	}// if correlated
 	// if not correlated
 	else { std::cout << "     |"; }
