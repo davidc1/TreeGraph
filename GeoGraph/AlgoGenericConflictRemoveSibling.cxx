@@ -1,17 +1,17 @@
-#ifndef ALGOGENERICCONFLICT_CXX
-#define ALGOGENERICCONFLICT_CXX
+#ifndef ALGOGENERICCONFLICTREMOVESIBLING_CXX
+#define ALGOGENERICCONFLICTREMOVESIBLING_CXX
 
-#include "AlgoGenericConflict.h"
+#include "AlgoGenericConflictRemoveSibling.h"
 
 namespace geotree{
 
-  AlgoGenericConflict::AlgoGenericConflict(NodeCollection *coll)
+  AlgoGenericConflictRemoveSibling::AlgoGenericConflictRemoveSibling(NodeCollection *coll)
   {
     _coll = coll;
-    _name = "GenericConflict";
+    _name = "GenericConflictRemoveSibling";
   }
 
-  void AlgoGenericConflict::ResolveConflict(const NodeID_t& id, const NodeID_t& parent, const NodeID_t& sibling)
+  void AlgoGenericConflictRemoveSibling::ResolveConflict(const NodeID_t& id, const NodeID_t& parent, const NodeID_t& sibling)
   {
 
     // since we are starting fresh, clear correlations currently stored

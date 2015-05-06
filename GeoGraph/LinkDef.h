@@ -19,7 +19,8 @@
 //#pragma link C++ class geotree::AlgoMultipleParentsBase+;
 #pragma link C++ class geotree::AlgoMultipleParentsHighScore+;
 #pragma link C++ class geotree::AlgoParentIsSiblingsSibling+;
-#pragma link C++ class geotree::AlgoGenericConflict+;
+#pragma link C++ class geotree::AlgoGenericConflictRemoveSibling+;
+#pragma link C++ class geotree::AlgoGenericConflictFindHighestScore+;
 #pragma link C++ class std::vector<geotree::Node>+;
 //ADD_NEW_CLASS ... do not change this line
 #endif

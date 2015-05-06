@@ -24,7 +24,7 @@ namespace geotree{
     _algoParentIsSiblingsSibling = new AlgoParentIsSiblingsSibling(&_coll);
 
     if (_algoGenericConflict) { delete _algoGenericConflict; }
-    _algoGenericConflict = new AlgoGenericConflict(&_coll);
+    _algoGenericConflict = new AlgoGenericConflictRemoveSibling(&_coll);
 
   }
   
@@ -340,12 +340,6 @@ namespace geotree{
     if (_verbose) { std::cout << "If there is a conflict, remove sibling status" << std::endl; }
     GenericConflict();
 
-    /*
-    // case in which sibling does not have a parent if this ID does
-    if (_verbose) { std::cout << "Make sure sibling has a parent if we do" << std::endl; }
-    SiblingDoesNotHaveSameParent();
-    */
-
     // Conflict 3)
     // Resolve conflict of multiple siblings
     if (_verbose) { std::cout << "merge or find best sibling if there are multiple siblings..." << std::endl; }
@@ -382,9 +376,6 @@ namespace geotree{
     std::map<NodeID_t,geotree::Correlation>::const_iterator it;
     // get correaltions for this node
     auto const corrs  = _coll.GetNode(ID).getCorrelations();
-    //auto const cTypes = _node_v[_node_map[ID]].getCorrType();   
-    // get correlation scores for this node
-    //auto const cScores = _node_v[_node_map[ID]].getCorrScores();
 
     // vector where to hold parent IDs
     std::vector<NodeID_t> parentIDs;
@@ -677,7 +668,7 @@ namespace geotree{
     return;
   }
   */
-
+  /*
   // Resolve conflict with a sibling having a different parent
   // if two siblings have different parent we need to choose 
   // the "best" configuration, otherwise we will have a logical
@@ -766,7 +757,7 @@ namespace geotree{
 
     return;
   }
-	
+  */	
   void Manager::ParentIsSiblingsSibling(){
 
     // Get list of nodes
@@ -826,65 +817,6 @@ namespace geotree{
     
     return;
   }
-
-  /*
-  void Manager::SiblingDoesNotHaveSameParent(){
-
-    // Get list of nodes
-    auto const IDs = _coll.GetNodeIDs();
-
-    for (auto &ID : IDs)
-      SiblingDoesNotHaveSameParent(ID);
-
-    return;
-  }
-
-
-  /// If sibling does not have the same parent -> figure out which score is largest
-  void Manager::SiblingDoesNotHaveSameParent(NodeID_t ID){
-
-    // if node has parent and sibling
-    // do something if sibling does not have a parent
-    if (_coll.GetNode(ID).hasConflict() == false)
-      return;
-
-    if (_verbose) { std::cout << "Making sure node " << ID 
-			      << "'s siblings also have a parent" << std::endl; }
-    
-    // get siblings
-    auto const siblings = _coll.GetNode(ID)).getSiblings();
-    // get parent
-    auto const parentID = _coll.GetNode(ID).getParent();    
-
-    for (auto& s : siblings){
-
-      // does the sibling have a parent? 
-      if ( _coll.GetNode(s).hasParent() == true ){
-	//true...ok...either same (good) or not.
-	// if not the same this will be resolved later by
-	// ResolveSiblingsWithDifferentParent
-	continue;
-      }
-      // ok...sibling does not have a parent.
-      // compare score with sibling and that with parent
-      // eliminate correlation with lowest score
-      double parentScore  = _coll.GetNode(ID).getScore(parentID);
-      double siblingScore = _coll.GetNode(ID).getScore(s);
-
-      if (parentScore > siblingScore){
-	if (_verbose) { std::cout << "Sibling does not have a parent. Removing sibling with lower score" << std::endl; }
-	EraseCorrelation(ID,s);
-      }
-      else{
-	if (_verbose) { std::cout << "Sibling does not have a parent. Removing parent with lower score" << std::endl; }
-	EraseCorrelation(ID,parentID);
-      }
-
-    }// for all siblings
-
-    return;
-  }
-  */
 
   void Manager::GenericConflict(){
 
