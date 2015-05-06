@@ -9,8 +9,15 @@
  */
 
 /** \addtogroup GeoTree
-    
+    This algorithm is called when a node was found to
+    have multiple parents.
+    Actions taken:
+    The correlation with the parent with the highest
+    score is retained. All other parent correlations
+    are removed. No check on other correlations with
+    other nodes are performed.
     @{*/
+
 #ifndef ALGOMULTIPLEPARENTSHIGHSCORE_H
 #define ALGOMULTIPLEPARENTSHIGHSCORE_H
 
@@ -26,7 +33,7 @@ namespace geotree{
     AlgoMultipleParentsHighScore() { _name="MultipleParentsHighScore"; }
 
     /// Constructor which syncs node collection for the algorithm
-    AlgoMultipleParentsHighScore(NodeCollection* coll);// { _name="MultipleParents"; _coll = coll; _verbose = false; }
+    AlgoMultipleParentsHighScore(NodeCollection* coll);
 
     void FindBestParent(const NodeID_t& id, const std::vector<NodeID_t>& parents);
 

@@ -9,8 +9,14 @@
  */
 
 /** \addtogroup GeoTree
-    
+    This algorithm is called when a "generic conflict" is found
+    A "generic conflict" means: the node has both a parent and 
+    a sibling.
+    Actions taken:
+    Relation with sibling is always removed. No check on other
+    correlations with other nodes are performed.
     @{*/
+
 #ifndef ALGOGENERICCONFLICTREMOVESIBLING_H
 #define ALGOGENERICCONFLICTREMOVESIBLING_H
 
@@ -26,7 +32,7 @@ namespace geotree{
     AlgoGenericConflictRemoveSibling() { _name="GenericConflictRemoveSibling"; }
 
     /// Constructor which syncs node collection for the algorithm
-    AlgoGenericConflictRemoveSibling(NodeCollection* coll);// { _name="MultipleParents"; _coll = coll; _verbose = false; }
+    AlgoGenericConflictRemoveSibling(NodeCollection* coll);
 
     void ResolveConflict(const NodeID_t& id, const NodeID_t& parent, const NodeID_t& sibling);
 
