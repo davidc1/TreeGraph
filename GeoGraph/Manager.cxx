@@ -812,25 +812,6 @@ namespace geotree{
 	  EraseCorrelation((corrit->first).first,(corrit->first).second);
       }// for correlations returned by the algorithm
 
-      /*
-      // we made it this far -> we have a problem!
-      // 3 nodes: ID, s, parentID
-      // scores to compare:
-      // A) (ID,parentID) + (ID,s)       -> this node is child of parent and sibling of s
-      // B) (ID,parentID) + (parentID,s) -> this node is child of parent and sibling is related to parent, not to this node
-      // whichever is larger wins
-      // basically compare (ID,s) and (parentID,s)
-      double A = _coll.GetNode(ID).getScore(s);
-      double B = _coll.GetNode(parentID).getScore(s);
-      if (A > B){
-      if (_verbose) { std::cout << "keep sibling. Remove relation between parent and sibling" << std::endl; }
-      EraseCorrelation(parentID,s);
-      }
-      else{
-      if (_verbose) { std::cout << "keep parent. Remove relation with sibling" << std::endl; }
-      EraseCorrelation(ID,s);
-      }
-      */
     }// for all siblings
     
     return;
