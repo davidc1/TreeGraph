@@ -22,7 +22,7 @@ namespace geotree{
 
   public:
     
-    AlgoMultipleParentsBase() { _name="MultipleParents"; _verbose = false; }
+    AlgoMultipleParentsBase() { _name="MultipleParents"; }
 
     /// Constructor which syncs node collection for the algorithm
     AlgoMultipleParentsBase(NodeCollection* coll) { _name="MultipleParents"; _coll = coll; _verbose = false; }

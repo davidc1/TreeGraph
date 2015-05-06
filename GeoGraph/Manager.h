@@ -18,6 +18,7 @@
 #include "NodeCollection.h"          //-> where nodes are stored
 //#include "AlgoMultipleParentsBase.h" //-> algorithm to resolve conflict due to multiple parents
 #include "AlgoMultipleParentsHighScore.h"
+#include "AlgoParentIsSiblingsSibling.h"
 
 namespace geotree{
 
@@ -102,8 +103,8 @@ namespace geotree{
     //void SortSiblingsAndParent();
     //void SortSiblingsAndParent(NodeID_t ID);
     void ResolveSiblingsWithDifferentParent(NodeID_t ID);
-    void ParentAndSiblingAreNotLogicallyConsistent();
-    void ParentAndSiblingAreNotLogicallyConsistent(NodeID_t ID);
+    void ParentIsSiblingsSibling();
+    void ParentIsSiblingsSibling(NodeID_t ID);
     //void SiblingDoesNotHaveSameParent();
     //void SiblingDoesNotHaveSameParent(NodeID_t ID);
     void IfConflictRemoveSibling();
@@ -134,6 +135,7 @@ namespace geotree{
 
     /// multiple parents algorithm
     AlgoMultipleParentsHighScore* _algoMultipleParents;
+    AlgoParentIsSiblingsSibling*  _algoParentIsSiblingsSibling;
 
   };
 }

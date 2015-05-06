@@ -23,10 +23,10 @@ namespace geotree{
 
   public:
     
-    AlgoMultipleParentsHighScore() { _name="MultipleParentsHighScore"; _verbose = false; }
+    AlgoMultipleParentsHighScore() { _name="MultipleParentsHighScore"; }
 
     /// Constructor which syncs node collection for the algorithm
-    AlgoMultipleParentsHighScore(NodeCollection* coll) { _name="MultipleParents"; _coll = coll; _verbose = false; }
+    AlgoMultipleParentsHighScore(NodeCollection* coll);// { _name="MultipleParents"; _coll = coll; _verbose = false; }
 
     void FindBestParent(const NodeID_t& id, const std::vector<NodeID_t>& parents);
 

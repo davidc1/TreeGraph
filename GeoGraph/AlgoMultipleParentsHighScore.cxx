@@ -5,6 +5,12 @@
 
 namespace geotree{
 
+  AlgoMultipleParentsHighScore::AlgoMultipleParentsHighScore(NodeCollection *coll)
+  {
+    _coll = coll;
+    _name = "MultipleParentsHighScore";
+  }
+
   void AlgoMultipleParentsHighScore::FindBestParent(const NodeID_t& id, const std::vector<NodeID_t>& parents)
   {
 
