@@ -104,7 +104,6 @@ namespace geotree{
     void SortSiblings();
     void SortSiblings(NodeID_t ID);
     /// function to resolve case in which node has both sibling and parent -> right now do nothing
-    void ResolveSiblingsWithDifferentParent(NodeID_t ID);
     void ParentIsSiblingsSibling();
     void ParentIsSiblingsSibling(NodeID_t ID);
     void GenericConflict();

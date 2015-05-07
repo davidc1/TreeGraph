@@ -21,6 +21,7 @@
 #pragma link C++ class geotree::AlgoParentIsSiblingsSibling+;
 #pragma link C++ class geotree::AlgoGenericConflictRemoveSibling+;
 #pragma link C++ class geotree::AlgoGenericConflictFindHighestScore+;
+#pragma link C++ class geotree::AlgoSibHasDiffParent+;
 #pragma link C++ class std::vector<geotree::Node>+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
