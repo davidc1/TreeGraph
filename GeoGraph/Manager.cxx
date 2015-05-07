@@ -308,24 +308,6 @@ namespace geotree{
 
   void Manager::ResolveConflicts(){
 
-    // what is a conflict?
-    // 1) two parents
-    // 2) a sibling with different parent
-    // 3) multiple siblings
-    // 4) has both siblings & parent
-
-    // solutions:
-    // 1) choose parent with best score
-    
-    // NOTE: THIS IS NOT IMPLEMENTED
-    // 2) compare score of possible scenarios:
-    // example: A -> B and C -> D 
-    // && B & D siblings
-    // score 1: (A -> B) + (C -> D)
-    // score 2: (A -> B) + (B && D)
-    // score 3: (C -> D) + (B && D)
-    // choose whichever is highest
-    
     // first resolve conflict 1)
     // if multiple parents, choose the
     // one with the highest score
@@ -345,12 +327,6 @@ namespace geotree{
     if (_verbose) { std::cout << "merge or find best sibling if there are multiple siblings..." << std::endl; }
     SortSiblings();
 
-    /*
-    // Conflict 4)
-    // Resolve potential conflict between siblings & parent
-    if (_verbose) { std::cout << "if parent and siblings resolve conflict..." << std::endl; }
-    SortSiblingsAndParent();
-    */
     return;
   }
 
@@ -400,15 +376,9 @@ namespace geotree{
     if (_verbose) { std::cout << "\talgoMultipleParents called..." << std::endl; }
     _algoMultipleParents->FindBestParent(ID,parentIDs);
 
+
     // now loop through correlations found and act on them
-    auto const algoCorrs = _algoMultipleParents->GetCorrelations();
-    
-    std::map< std::pair<NodeID_t,NodeID_t>, geotree::Correlation >::const_iterator corrit;
-    for (corrit = algoCorrs.begin(); corrit != algoCorrs.end(); corrit++){
-      // if correlation's score is negative -> remove
-      if (corrit->second.Score() < 0)
-	EraseCorrelation((corrit->first).first,(corrit->first).second);
-    }// for correlations returned by the algorithm
+    ApplyAlgoCorrelations(_algoMultipleParents->GetCorrelations());
 
     return;
   }
@@ -581,14 +551,7 @@ namespace geotree{
       _algoParentIsSiblingsSibling->ResolveConflict(ID,parentID,s);
 
       // now loop through correlations found and act on them
-      auto const algoCorrs = _algoParentIsSiblingsSibling->GetCorrelations();
-    
-      std::map< std::pair<NodeID_t,NodeID_t>, geotree::Correlation >::const_iterator corrit;
-      for (corrit = algoCorrs.begin(); corrit != algoCorrs.end(); corrit++){
-	// if correlation's score is negative -> remove
-	if (corrit->second.Score() < 0)
-	  EraseCorrelation((corrit->first).first,(corrit->first).second);
-      }// for correlations returned by the algorithm
+      ApplyAlgoCorrelations(_algoParentIsSiblingsSibling->GetCorrelations());
 
     }// for all siblings
     
@@ -627,16 +590,35 @@ namespace geotree{
       _algoGenericConflict->ResolveConflict(ID,parentID,s);
 
       // now loop through correlations found and act on them
-      auto const algoCorrs = _algoGenericConflict->GetCorrelations();
-    
-      std::map< std::pair<NodeID_t,NodeID_t>, geotree::Correlation >::const_iterator corrit;
-      for (corrit = algoCorrs.begin(); corrit != algoCorrs.end(); corrit++){
-	// if correlation's score is negative -> remove
-	if (corrit->second.Score() < 0)
-	  EraseCorrelation((corrit->first).first,(corrit->first).second);
-      }// for correlations returned by the algorithm
+      ApplyAlgoCorrelations(_algoGenericConflict->GetCorrelations());
 
     }// for all siblings
+
+    return;
+  }
+
+
+  void Manager::ApplyAlgoCorrelations(const std::map< std::pair<NodeID_t, NodeID_t>, geotree::Correlation>& algoCorrs){
+
+
+      std::map< std::pair<NodeID_t,NodeID_t>, geotree::Correlation >::const_iterator corrit;
+      for (corrit = algoCorrs.begin(); corrit != algoCorrs.end(); corrit++){
+	// nodes involved
+	NodeID_t n1 = (corrit->first).first;
+	NodeID_t n2 = (corrit->first).second;
+	// if correlation's score is negative -> remove
+	if (corrit->second.Score() < 0)
+	  EraseCorrelation(n1,n2);
+	// if the correlation score is > 0
+	// either we need to create a new
+	// one if none exists or we need
+	// to edit an already existing
+	// correlation
+	else if (_coll.GetNode(n1).isCorrelated(n2) == true)
+	  EditCorrelation(n1,n2,corrit->second.Score(),corrit->second.Vtx(),corrit->second.Relation());
+	else
+	  AddCorrelation(n1,n2,corrit->second.Score(),corrit->second.Vtx(),corrit->second.Relation());
+      }// for correlations returned by the algorithm
 
     return;
   }

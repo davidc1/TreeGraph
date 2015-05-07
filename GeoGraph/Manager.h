@@ -108,6 +108,9 @@ namespace geotree{
     void ParentIsSiblingsSibling(NodeID_t ID);
     void GenericConflict();
     void GenericConflict(NodeID_t ID);
+
+    void ApplyAlgoCorrelations(const std::map< std::pair<NodeID_t, NodeID_t>, geotree::Correlation>& algoCorrs);
+
   private:
 
     /// verbosity flag
