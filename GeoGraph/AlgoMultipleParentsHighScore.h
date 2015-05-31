@@ -21,14 +21,15 @@
 #ifndef ALGOMULTIPLEPARENTSHIGHSCORE_H
 #define ALGOMULTIPLEPARENTSHIGHSCORE_H
 
-//#include "AlgoMultipleParentsBase.h"
-#include "AlgoBase.h"
+#include "AlgoMultipleParentsBase.h"
+//#include "AlgoBase.h"
 
 namespace geotree{
 
-  class AlgoMultipleParentsHighScore : public AlgoBase {
+  class AlgoMultipleParentsHighScore : public AlgoMultipleParentsBase {
 
   public:
+
     
     AlgoMultipleParentsHighScore() { _name="MultipleParentsHighScore"; }
 

@@ -16,9 +16,11 @@
 #pragma link C++ class geotree::Manager+;
 #pragma link C++ class geotree::Relation+;
 #pragma link C++ class geotree::AlgoBase+;
-//#pragma link C++ class geotree::AlgoMultipleParentsBase+;
+#pragma link C++ class geotree::AlgoMultipleParentsBase+;
 #pragma link C++ class geotree::AlgoMultipleParentsHighScore+;
+#pragma link C++ class geotree::AlgoParentIsSiblingsSiblingBase+;
 #pragma link C++ class geotree::AlgoParentIsSiblingsSibling+;
+#pragma link C++ class geotree::AlgoGenericConflictBase+;
 #pragma link C++ class geotree::AlgoGenericConflictRemoveSibling+;
 #pragma link C++ class geotree::AlgoGenericConflictFindHighestScore+;
 #pragma link C++ class geotree::AlgoSibHasDiffParent+;

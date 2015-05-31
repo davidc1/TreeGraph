@@ -28,12 +28,12 @@
 #ifndef ALGOPARENTISSIBLINGSSIBLING_H
 #define ALGOPARENTISSIBLINGSSIBLING_H
 
-//#include "AlgoMultipleParentsBase.h"
-#include "AlgoBase.h"
+#include "AlgoParentIsSiblingsSiblingBase.h"
+//#include "AlgoBase.h"
 
 namespace geotree{
 
-  class AlgoParentIsSiblingsSibling : public AlgoBase {
+  class AlgoParentIsSiblingsSibling : public AlgoParentIsSiblingsSiblingBase {
 
   public:
     

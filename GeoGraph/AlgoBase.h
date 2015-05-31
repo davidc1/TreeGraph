@@ -39,9 +39,6 @@ namespace geotree{
     /// clear correlations. To be called every time aglorithm is applied to a node
     virtual void ClearCorrelations() { _corr_v.clear(); }
 
-    /// Function that sorts conflicts
-    virtual void Apply(const NodeID_t ID, const std::vector<::geotree::Node>& node_v) { return; }
-
     /// set verbosity
     void SetVerbose(bool on) { _verbose = on; }
 

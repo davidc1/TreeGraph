@@ -3,8 +3,4 @@
 
 #include "AlgoMultipleParentsBase.h"
 
-namespace geotree{
-
-}
-
 #endif

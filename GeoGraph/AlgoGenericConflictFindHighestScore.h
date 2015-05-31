@@ -22,12 +22,11 @@
 #ifndef ALGOGENERICCONFLICTFINDHIGHESTSCORE_H
 #define ALGOGENERICCONFLICTFINDHIGHESTSCORE_H
 
-//#include "AlgoMultipleParentsBase.h"
-#include "AlgoBase.h"
+#include "AlgoGenericConflictBase.h"
 
 namespace geotree{
 
-  class AlgoGenericConflictFindHighestScore : public AlgoBase {
+  class AlgoGenericConflictFindHighestScore : public AlgoGenericConflictBase {
 
   public:
     

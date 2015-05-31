@@ -27,7 +27,7 @@ namespace geotree{
     /// Constructor which syncs node collection for the algorithm
     AlgoMultipleParentsBase(NodeCollection* coll) { _name="MultipleParents"; _coll = coll; _verbose = false; }
 
-    virtual void FindBestParent(const NodeID_t& id, const std::vector<NodeID_t>& parents);
+    virtual void FindBestParent(const NodeID_t& id, const std::vector<NodeID_t>& parents) {}
 
   };
 }

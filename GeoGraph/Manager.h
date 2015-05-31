@@ -136,9 +136,9 @@ namespace geotree{
     ::geoalgo::GeoAlgo _geoAlgo;
 
     /// multiple parents algorithm
-    AlgoMultipleParentsHighScore*      _algoMultipleParents;
-    AlgoParentIsSiblingsSibling*       _algoParentIsSiblingsSibling;
-    AlgoGenericConflictRemoveSibling*  _algoGenericConflict;
+    AlgoMultipleParentsHighScore*         _algoMultipleParents;
+    AlgoParentIsSiblingsSibling* _algoParentIsSiblingsSibling;
+    AlgoGenericConflictRemoveSibling*         _algoGenericConflict;
 
   };
 }
